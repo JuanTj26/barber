@@ -467,8 +467,8 @@
                             <div>
                                 <label for="hora_inicio"
                                     class="block text-xs uppercase tracking-wider text-muted-light font-medium mb-2">Hora
-                                    de entrada *</label>
-                                <input type="time" id="hora_inicio" required
+                                    de entrada * (10:00 — 19:30)</label>
+                                <input type="time" id="hora_inicio" required min="10:00" max="19:30"
                                     class="w-full bg-bone border border-line-light rounded-lg px-4 py-3 text-ink text-sm focus:border-gold focus:outline-none">
                             </div>
                         </div>
@@ -496,6 +496,7 @@
                     e.preventDefault();
                     const alerta = document.getElementById('mensaje-alerta');
 
+<<<<<<< HEAD
                     const datos = {
                         nombre: document.getElementById('nombre').value,
                         telefono: document.getElementById('telefono').value,
@@ -509,6 +510,60 @@
 
                     const password = document.getElementById('password-cliente').value;
                     if (password && password.length < 8) { mostrarAlerta('La contraseña debe tener al menos 8 caracteres.', false); return; }
+=======
+                    <!-- Columna 2: Acceso de Clientes / Perfil Integrado -->
+                    <div id="cuenta-cliente"
+                        class="bg-ink p-8 rounded-lg border border-line-dark flex flex-col justify-between">
+                        
+                        <!-- Estado 1: Formulario de Login (Visible si no hay sesión iniciada) -->
+                        <div id="panel-login-cliente">
+                            <h3 class="font-serif text-xl font-bold text-bone mb-2">Acceso de Clientes</h3>
+                            <p class="text-xs text-muted-dark mb-6 leading-relaxed">
+                                ¿Creaste una contraseña al reservar? Inicia sesión para consultar tu historial y gestionar citas.
+                            </p>
+
+                            <form id="form-login-cliente" class="space-y-3">
+                                <input id="login-email-cliente" type="email" required
+                                    placeholder="Tu correo electrónico"
+                                    class="w-full bg-ink border border-line-dark rounded-lg px-4 py-2.5 text-bone text-xs placeholder-muted-dark focus:border-gold focus:outline-none transition">
+                                <input id="login-password-cliente" type="password" required placeholder="Tu contraseña"
+                                    class="w-full bg-ink border border-line-dark rounded-lg px-4 py-2.5 text-bone text-xs placeholder-muted-dark focus:border-gold focus:outline-none transition">
+                                <button type="submit"
+                                    class="w-full py-2.5 rounded-full border border-line-dark hover:border-gold text-bone hover:text-gold text-xs font-medium uppercase tracking-wider transition">
+                                    Iniciar sesión
+                                </button>
+                            </form>
+                            <p id="mensaje-login-cliente" class="mt-4 text-xs text-muted-dark"></p>
+                        </div>
+
+                        <!-- Estado 2: Perfil del Cliente Integrado (Reemplaza el login limpiamente) -->
+                        <div id="perfil-cliente" class="hidden space-y-4">
+                            <div class="flex justify-between items-start pb-3 border-b border-line-dark">
+                                <div>
+                                    <span class="text-[10px] uppercase tracking-widest text-gold block font-medium">Sesión Activa</span>
+                                    <h4 id="saludo-cliente" class="font-serif text-xl font-bold text-bone leading-tight">Mi Perfil</h4>
+                                    <div id="datos-perfil" class="text-[11px] text-muted-dark mt-0.5"></div>
+                                </div>
+                                <button id="cerrar-sesion-cliente" class="text-[11px] text-muted-dark hover:text-red-400 underline transition whitespace-nowrap pt-1">
+                                    Cerrar sesión
+                                </button>
+                            </div>
+
+                            <!-- Lista compacta de citas con scroll suave -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-bone font-medium">Mis Citas</span>
+                                    <span id="contador-citas" class="text-muted-dark font-mono text-[10px]"></span>
+                                </div>
+                                <div id="citas-perfil" class="max-h-[380px] overflow-y-auto space-y-3 pr-1 no-scrollbar"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+>>>>>>> f880d07 (horario validado hora laboral)
 
                     try {
                         const res = await fetch('api/citas.php', {

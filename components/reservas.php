@@ -81,8 +81,8 @@
                                class="w-full bg-bone border border-line-light rounded-lg px-4 py-3 text-ink text-sm focus:border-gold focus:outline-none transition">
                     </div>
                     <div>
-                        <label for="hora_inicio" class="block text-xs uppercase tracking-wider text-muted-light font-medium mb-2">Hora de entrada *</label>
-                        <input type="time" id="hora_inicio" required 
+                        <label for="hora_inicio" class="block text-xs uppercase tracking-wider text-muted-light font-medium mb-2">Hora de entrada * (10:00 — 19:30)</label>
+                        <input type="time" id="hora_inicio" required min="10:00" max="19:30" 
                                class="w-full bg-bone border border-line-light rounded-lg px-4 py-3 text-ink text-sm focus:border-gold focus:outline-none transition">
                     </div>
                 </div>

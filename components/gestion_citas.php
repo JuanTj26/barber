@@ -33,12 +33,14 @@
                 <div id="resultado-cita" class="mt-6 pt-6 border-t border-line-dark text-xs empty:hidden"></div>
             </div>
 
-            <!-- Columna 2: Acceso de Miembro -->
+            <!-- Columna 2: Acceso de Clientes / Perfil Integrado -->
             <div id="cuenta-cliente" class="bg-ink p-8 rounded-lg border border-line-dark flex flex-col justify-between">
-                <div>
+                
+                <!-- Estado 1: Formulario de Login (Visible si no hay sesión iniciada) -->
+                <div id="panel-login-cliente">
                     <h3 class="font-serif text-xl font-bold text-bone mb-2">Acceso de Clientes</h3>
                     <p class="text-xs text-muted-dark mb-6 leading-relaxed">
-                        ¿Creaste una contraseña? Inicia sesión para ver tu historial y gestionar citas activas.
+                        ¿Creaste una contraseña al reservar? Inicia sesión para consultar tu historial y gestionar citas.
                     </p>
 
                     <form id="form-login-cliente" class="space-y-3">
@@ -50,27 +52,34 @@
                             Iniciar sesión
                         </button>
                     </form>
+                    <p id="mensaje-login-cliente" class="mt-4 text-xs text-muted-dark"></p>
                 </div>
 
-                <p id="mensaje-login-cliente" class="mt-4 text-xs text-muted-dark"></p>
-            </div>
+                <!-- Estado 2: Perfil del Cliente Integrado (Reemplaza el login limpiamente) -->
+                <div id="perfil-cliente" class="hidden space-y-4">
+                    <div class="flex justify-between items-start pb-3 border-b border-line-dark">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest text-gold block font-medium">Sesión Activa</span>
+                            <h4 id="saludo-cliente" class="font-serif text-xl font-bold text-bone leading-tight">Mi Perfil</h4>
+                            <div id="datos-perfil" class="text-[11px] text-muted-dark mt-0.5"></div>
+                        </div>
+                        <button id="cerrar-sesion-cliente" class="text-[11px] text-muted-dark hover:text-red-400 underline transition whitespace-nowrap pt-1">
+                            Cerrar sesión
+                        </button>
+                    </div>
 
-        </div>
-
-        <!-- Panel Desplegable de Perfil de Cliente -->
-        <div id="perfil-cliente" class="hidden mt-10 bg-ink p-8 rounded-lg border border-line-dark">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-line-dark">
-                <div>
-                    <span class="text-xs uppercase tracking-widest text-gold block">Sesión Activa</span>
-                    <h4 class="font-serif text-2xl font-bold text-bone">Mi Historial de Citas</h4>
+                    <!-- Lista compacta de citas con scroll suave -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-bone font-medium">Mis Citas</span>
+                            <span id="contador-citas" class="text-muted-dark font-mono text-[10px]"></span>
+                        </div>
+                        <div id="citas-perfil" class="max-h-[380px] overflow-y-auto space-y-3 pr-1 no-scrollbar"></div>
+                    </div>
                 </div>
-                <button id="cerrar-sesion-cliente" class="text-xs text-muted-dark hover:text-bone underline transition">
-                    Cerrar sesión
-                </button>
+
             </div>
 
-            <div id="datos-perfil" class="text-xs text-muted-dark mb-6 pb-4 border-b border-line-dark"></div>
-            <div id="citas-perfil" class="space-y-4"></div>
         </div>
 
     </div>

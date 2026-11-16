@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch('api/auth.php?action=status')
         .then(r => r.json())
         .then(s => { if (s && s.cliente) cargarPerfilCliente(); })
-        .catch(() => {});
+        .catch(() => { });
 });
 
 // 1. Cargar Servicios: Lista estilo Menú con líneas finas (border-b)
@@ -71,10 +71,10 @@ async function cargarServiciosEnLanding() {
     try {
         const res = await fetch('api/servicios.php');
         const servicios = await res.json();
-        
+
         const grid = document.getElementById('grid-servicios');
         const select = document.getElementById('servicio_id');
-        
+
         if (!grid || !select) return;
 
         grid.innerHTML = '';
@@ -130,14 +130,14 @@ async function cargarBarberosEnLanding() {
     try {
         let barberos = [];
         try {
-            const r = await fetch('api/barberos.php'); 
+            const r = await fetch('api/barberos.php');
             if (r.ok) {
                 barberos = await r.json();
             }
-        } catch(err) {
+        } catch (err) {
             console.warn("API de barberos offline, usando roster por defecto:", err);
         }
-        
+
         if (select) select.innerHTML = '<option value="">Selecciona un barbero</option>';
         if (grid) grid.innerHTML = '';
 
@@ -162,7 +162,7 @@ async function cargarBarberosEnLanding() {
             if (select) {
                 select.insertAdjacentHTML('beforeend', `<option value="${b.id}">${b.nombre}${b.especialidad ? ' — ' + b.especialidad : ''}</option>`);
             }
-            
+
             if (grid) {
                 const foto = fotosBarberos[idx % fotosBarberos.length];
                 grid.innerHTML += `
@@ -186,9 +186,9 @@ async function cargarBarberosEnLanding() {
         // Inicializar controles del carrusel después de renderizar
         iniciarControlesCarruselBarberos();
 
-    } catch(e) { 
+    } catch (e) {
         console.error("Error al inicializar carrusel de barberos:", e);
-        if (select) select.innerHTML = '<option value="">No se pudieron cargar los barberos</option>'; 
+        if (select) select.innerHTML = '<option value="">No se pudieron cargar los barberos</option>';
     }
 }
 
@@ -256,9 +256,9 @@ async function enviarCita(e) {
     };
 
     const password = document.getElementById('password-cliente').value;
-    if (password && password.length < 8) { 
-        mostrarAlerta('La contraseña debe contener al menos 8 caracteres.', false); 
-        return; 
+    if (password && password.length < 8) {
+        mostrarAlerta('La contraseña debe contener al menos 8 caracteres.', false);
+        return;
     }
 
     // Validar domingo (0 = domingo)
@@ -288,7 +288,7 @@ async function enviarCita(e) {
             const emailInfo = resultado.email_notification?.sent
                 ? '<br><span class="text-xs text-muted-light">Notificación enviada a tu correo.</span>'
                 : datos.email ? '<br><span class="text-xs text-muted-light">Guarda tu folio para consultar tu cita.</span>' : '';
-            
+
             alerta.innerHTML = `
                 <div class="font-medium text-ink">${resultado.message}</div>
                 <div class="inline-block px-4 py-1.5 rounded-full bg-bone border border-line-light font-mono text-sm font-bold text-gold tracking-wider mt-1">
@@ -326,7 +326,7 @@ function textoNotificacionCorreo(result) {
 
 // 4. Iniciar Sesión de Cliente
 async function iniciarSesionCliente(e) {
-    e.preventDefault(); 
+    e.preventDefault();
     const out = document.getElementById('mensaje-login-cliente');
     out.textContent = "Validando credenciales...";
     try {
@@ -339,24 +339,24 @@ async function iniciarSesionCliente(e) {
                 password: document.getElementById('login-password-cliente').value
             })
         });
-        const d = await r.json(); 
+        const d = await r.json();
         if (!d.success) throw new Error(d.message);
-        
-        document.getElementById('nombre').value = d.cliente.nombre; 
-        document.getElementById('telefono').value = d.cliente.telefono; 
+
+        document.getElementById('nombre').value = d.cliente.nombre;
+        document.getElementById('telefono').value = d.cliente.telefono;
         document.getElementById('email').value = d.cliente.email;
-        
+
         out.className = "mt-4 text-xs text-bone";
         out.textContent = `Sesión iniciada con éxito. Bienvenido, ${d.cliente.nombre}.`;
         cargarPerfilCliente();
-    } catch(err) { 
+    } catch (err) {
         out.className = "mt-4 text-xs text-red-400";
-        out.textContent = err.message; 
+        out.textContent = err.message;
     }
 }
 
 // Función global para alternar acordeón de reprogramar en tarjeta de perfil
-window.toggleFormularioReprogramar = function(folio) {
+window.toggleFormularioReprogramar = function (folio) {
     const form = document.getElementById(`reprogramar-${folio}`);
     const flecha = document.getElementById(`flecha-${folio}`);
     if (!form) return;
@@ -371,20 +371,20 @@ window.toggleFormularioReprogramar = function(folio) {
 async function cargarPerfilCliente() {
     const panelLogin = document.getElementById('panel-login-cliente');
     const panelPerfil = document.getElementById('perfil-cliente');
-    
-    const r = await fetch('api/clientes.php?perfil=1'); 
+
+    const r = await fetch('api/clientes.php?perfil=1');
     const d = await r.json();
-    
+
     if (!d.success) {
         if (panelLogin) panelLogin.classList.remove('hidden');
         if (panelPerfil) panelPerfil.classList.add('hidden');
         return;
     }
-    
+
     // Ocultar formulario de login y mostrar perfil integrado en la misma columna
     if (panelLogin) panelLogin.classList.add('hidden');
     if (panelPerfil) panelPerfil.classList.remove('hidden');
-    
+
     const saludoElem = document.getElementById('saludo-cliente');
     if (saludoElem) {
         const primerNombre = d.cliente.nombre ? d.cliente.nombre.split(' ')[0] : 'Cliente';
@@ -400,7 +400,7 @@ async function cargarPerfilCliente() {
     if (contadorElem) {
         contadorElem.textContent = `${d.citas.length} ${d.citas.length === 1 ? 'cita' : 'citas'}`;
     }
-    
+
     const box = document.getElementById('citas-perfil');
     if (!box) return;
 
@@ -427,7 +427,7 @@ async function cargarPerfilCliente() {
                         <div class="text-[11px] text-gold font-medium mt-0.5">$${c.precio} MXN · <span class="text-muted-dark font-normal">${c.barbero_nombre || 'Barbero asignado'}</span></div>
                         <div class="text-[11px] text-muted-dark mt-1 flex items-center gap-1.5 font-sans">
                             <span class="inline-block w-1.5 h-1.5 rounded-full bg-gold"></span>
-                            ${c.fecha} · ${c.hora_inicio.slice(0,5)} hs
+                            ${c.fecha} · ${c.hora_inicio.slice(0, 5)} hs
                         </div>
                     </div>
                     <div class="text-right flex flex-col items-end gap-1">
@@ -475,8 +475,8 @@ async function cargarPerfilCliente() {
 
 // 6. Reprogramar desde el Perfil
 async function reprogramarDesdePerfil(e) {
-    if (!e.target.matches('.form-perfil-cita')) return; 
-    e.preventDefault(); 
+    if (!e.target.matches('.form-perfil-cita')) return;
+    e.preventDefault();
     const f = e.target;
     const r = await fetch('api/citas.php', {
         method: 'PUT',
@@ -488,23 +488,23 @@ async function reprogramarDesdePerfil(e) {
             hora_inicio: f.elements.hora_inicio.value
         })
     });
-    const d = await r.json(); 
-    alert(d.message + textoNotificacionCorreo(d.email_notification)); 
+    const d = await r.json();
+    alert(d.message + textoNotificacionCorreo(d.email_notification));
     if (d.success) cargarPerfilCliente();
 }
 
 // 7. Cancelar desde el Perfil
 async function gestionarCitaPerfil(e) {
-    const folio = e.target.dataset.cancelar; 
-    if (!folio) return; 
+    const folio = e.target.dataset.cancelar;
+    if (!folio) return;
     if (!confirm(`¿Confirmas la cancelación de la cita con folio ${folio}?`)) return;
     const r = await fetch('api/citas.php', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'customer_cancel', folio })
-    }); 
-    const d = await r.json(); 
-    alert(d.message + textoNotificacionCorreo(d.email_notification)); 
+    });
+    const d = await r.json();
+    alert(d.message + textoNotificacionCorreo(d.email_notification));
     if (d.success) cargarPerfilCliente();
 }
 
@@ -517,8 +517,8 @@ async function cerrarSesionCliente() {
     });
     const panelLogin = document.getElementById('panel-login-cliente');
     const panelPerfil = document.getElementById('perfil-cliente');
-    if (panelPerfil) panelPerfil.classList.add('hidden'); 
-    if (panelLogin) panelLogin.classList.remove('hidden'); 
+    if (panelPerfil) panelPerfil.classList.add('hidden');
+    if (panelLogin) panelLogin.classList.remove('hidden');
     const loginMsg = document.getElementById('mensaje-login-cliente');
     if (loginMsg) {
         loginMsg.textContent = 'Sesión cerrada exitosamente.';
@@ -528,23 +528,23 @@ async function cerrarSesionCliente() {
 
 // 9. Consulta de Cita por Folio
 async function consultarCita(e) {
-    e.preventDefault(); 
-    const folio = document.getElementById('folio-consulta').value.trim(); 
+    e.preventDefault();
+    const folio = document.getElementById('folio-consulta').value.trim();
     const panel = document.getElementById('resultado-cita');
     if (!panel) return;
 
     panel.classList.remove('empty:hidden');
     panel.innerHTML = '<span class="text-gold">Consultando cita...</span>';
-    
+
     try {
-        const r = await fetch(`api/citas.php?folio=${encodeURIComponent(folio)}`); 
+        const r = await fetch(`api/citas.php?folio=${encodeURIComponent(folio)}`);
         const d = await r.json();
-        
-        if (!d.success) { 
-            panel.innerHTML = `<span class="text-red-400">${d.message}</span>`; 
-            return; 
+
+        if (!d.success) {
+            panel.innerHTML = `<span class="text-red-400">${d.message}</span>`;
+            return;
         }
-        
+
         const c = d.cita;
         const badgeColor = {
             confirmada: 'bg-emerald-950/60 text-emerald-300 border-emerald-800',
@@ -560,11 +560,11 @@ async function consultarCita(e) {
                     <span class="px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border ${badgeColor}">${c.estado}</span>
                 </div>
                 <div class="font-serif text-lg font-bold text-bone">${c.servicio_name}</div>
-                <div class="text-muted-dark text-xs">${c.fecha} · ${c.hora_inicio.slice(0,5)} — ${c.hora_fin.slice(0,5)}</div>
+                <div class="text-muted-dark text-xs">${c.fecha} · ${c.hora_inicio.slice(0, 5)} — ${c.hora_fin.slice(0, 5)}</div>
                 <div class="text-muted-dark text-xs">Barbero: ${c.barbero_nombre || 'Sin asignar'}</div>
             </div>
         `;
-        
+
         if (!['cancelada', 'completada'].includes(c.estado)) {
             panel.innerHTML += `
                 <form id="form-reprogramar" class="mt-4 space-y-3">
@@ -588,10 +588,10 @@ async function consultarCita(e) {
             `;
         }
 
-        const form = document.getElementById('form-reprogramar'); 
+        const form = document.getElementById('form-reprogramar');
         if (form) {
-            form.addEventListener('submit', async ev => { 
-                ev.preventDefault(); 
+            form.addEventListener('submit', async ev => {
+                ev.preventDefault();
                 const response = await fetch('api/citas.php', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -601,28 +601,28 @@ async function consultarCita(e) {
                         fecha: document.getElementById('nueva-fecha').value,
                         hora_inicio: document.getElementById('nueva-hora').value
                     })
-                }); 
-                const result = await response.json(); 
-                alert(result.message + textoNotificacionCorreo(result.email_notification)); 
-                if (result.success) document.getElementById('form-consulta').requestSubmit(); 
+                });
+                const result = await response.json();
+                alert(result.message + textoNotificacionCorreo(result.email_notification));
+                if (result.success) document.getElementById('form-consulta').requestSubmit();
             });
         }
 
-        const cancel = document.getElementById('cancelar-cita'); 
+        const cancel = document.getElementById('cancelar-cita');
         if (cancel) {
-            cancel.addEventListener('click', async () => { 
-                if (!confirm('¿Seguro que deseas cancelar esta cita?')) return; 
+            cancel.addEventListener('click', async () => {
+                if (!confirm('¿Seguro que deseas cancelar esta cita?')) return;
                 const response = await fetch('api/citas.php', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'customer_cancel', folio })
-                }); 
-                const result = await response.json(); 
-                alert(result.message + textoNotificacionCorreo(result.email_notification)); 
-                if (result.success) document.getElementById('form-consulta').requestSubmit(); 
+                });
+                const result = await response.json();
+                alert(result.message + textoNotificacionCorreo(result.email_notification));
+                if (result.success) document.getElementById('form-consulta').requestSubmit();
             });
         }
-    } catch { 
-        panel.innerHTML = '<span class="text-red-400">No se pudo consultar la cita.</span>'; 
+    } catch {
+        panel.innerHTML = '<span class="text-red-400">No se pudo consultar la cita.</span>';
     }
 }
