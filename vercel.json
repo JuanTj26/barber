@@ -1,8 +1,19 @@
 {
-  "buildCommand": null,
-  "outputDirectory": ".",
-  "framework": null,
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.php" }
+  "functions": {
+    "api/*.php": {
+      "runtime": "vercel-php@0.7.2"
+    },
+    "index.php": {
+      "runtime": "vercel-php@0.7.2"
+    },
+    "admin.php": {
+      "runtime": "vercel-php@0.7.2"
+    }
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/admin", "dest": "/admin.html" },
+    { "src": "/(.*\\.js)", "dest": "/js/$1" },
+    { "src": "/(.*)", "dest": "/index.php" }
   ]
 }
