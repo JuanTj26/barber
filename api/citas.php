@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/notificaciones.php';
 session_set_cookie_params(['httponly' => true, 'secure' => !empty($_SERVER['HTTPS']), 'samesite' => 'Lax']);
 session_start();
 function citaJson($payload, $status = 200)
@@ -63,7 +64,8 @@ if ($method === 'POST') {
         $stmt->execute([$clientId, $servicioId, $barberoId, $fecha, $horaInicio . ':00', $horaFin, $folio]);
         $id = (int)$conn->lastInsertId();
         $conn->commit();
-        citaJson(['success' => true, 'message' => '¡Cita agendada!', 'folio' => $folio, 'id' => $id]);
+        $emailNotice = notificarCita($conn, $id, 'created');
+        citaJson(['success' => true, 'message' => '¡Cita agendada!', 'folio' => $folio, 'id' => $id, 'email_notification' => $emailNotice]);
     } catch (PDOException $e) {
         if ($conn->inTransaction()) $conn->rollBack();
         citaJson(['success' => false, 'message' => 'No se pudo guardar la cita.'], 500);
@@ -124,7 +126,8 @@ if ($method === 'PUT') {
             $stmt = $conn->prepare('UPDATE citas SET fecha=?,hora_inicio=?,hora_fin=? WHERE id=?');
             $stmt->execute([$fecha, $hora . ':00', $end->format('H:i:s'), $old['id']]);
             $conn->commit();
-            citaJson(['success' => true, 'message' => 'Horario actualizado.']);
+            $emailNotice = notificarCita($conn, (int)$old['id'], 'rescheduled');
+            citaJson(['success' => true, 'message' => 'Horario actualizado.', 'email_notification' => $emailNotice]);
         } catch (PDOException $e) {
             if ($conn->inTransaction()) $conn->rollBack();
             citaJson(['success' => false, 'message' => 'No se pudo actualizar la cita.'], 500);
@@ -136,10 +139,13 @@ if ($method === 'PUT') {
             $owner->execute([strtoupper(trim($data['folio'] ?? ''))]);
             if ((int)$owner->fetchColumn() !== (int)$_SESSION['client_id']) citaJson(['success' => false, 'message' => 'Esa cita no pertenece a tu cuenta.'], 403);
         }
-        $stmt = $conn->prepare('UPDATE citas SET estado=\'cancelada\' WHERE folio=? AND estado IN (\'pendiente\',\'confirmada\')');
-        $stmt->execute([strtoupper(trim($data['folio'] ?? ''))]);
-        if (!$stmt->rowCount()) citaJson(['success' => false, 'message' => 'No se encontró una cita activa con ese folio.'], 404);
-        citaJson(['success' => true, 'message' => 'Cita cancelada.']);
+        $folio = strtoupper(trim($data['folio'] ?? ''));
+        $find = $conn->prepare('SELECT id FROM citas WHERE folio=? AND estado IN (\'pendiente\',\'confirmada\')');
+        $find->execute([$folio]); $citaId = (int)$find->fetchColumn();
+        if (!$citaId) citaJson(['success' => false, 'message' => 'No se encontró una cita activa con ese folio.'], 404);
+        $stmt = $conn->prepare('UPDATE citas SET estado=\'cancelada\' WHERE id=?'); $stmt->execute([$citaId]);
+        $emailNotice = notificarCita($conn, $citaId, 'cancelled');
+        citaJson(['success' => true, 'message' => 'Cita cancelada.', 'email_notification' => $emailNotice]);
     }
     adminRequired();
     $id = (int)($data['id'] ?? 0);
@@ -147,6 +153,7 @@ if ($method === 'PUT') {
     if (!$id || !in_array($estado, ['pendiente', 'confirmada', 'cancelada', 'completada'], true)) citaJson(['success' => false, 'message' => 'Datos inválidos.'], 400);
     $stmt = $conn->prepare('UPDATE citas SET estado=? WHERE id=?');
     $stmt->execute([$estado, $id]);
-    citaJson(['success' => true, 'message' => 'Estado actualizado.']);
+    $emailNotice = $stmt->rowCount() ? notificarCita($conn, $id, $estado === 'cancelada' ? 'cancelled' : 'status') : ['sent' => false, 'reason' => 'unchanged'];
+    citaJson(['success' => true, 'message' => 'Estado actualizado.', 'email_notification' => $emailNotice]);
 }
 citaJson(['success' => false, 'message' => 'Método no permitido.'], 405);

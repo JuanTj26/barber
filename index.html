@@ -203,7 +203,10 @@
                 alerta.classList.remove('hidden');
                 if (resultado.success) {
                     alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-green-900 text-green-200 border border-green-700";
-                    alerta.innerHTML = `${resultado.message}<br><strong>Guarda tu folio: ${resultado.folio}</strong>`;
+                    const emailInfo = resultado.email_notification?.sent
+                        ? '<br>También enviamos la confirmación a tu correo.'
+                        : datos.email ? '<br>No se pudo enviar el correo; conserva tu folio para consultar la cita.' : '<br>Agrega un correo si quieres recibir avisos.';
+                    alerta.innerHTML = `${resultado.message}<br><strong>Guarda tu folio: ${resultado.folio}</strong>${emailInfo}`;
                     document.getElementById('form-cita').reset();
                 } else {
                     alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-red-900 text-red-200 border border-red-700";
@@ -219,6 +222,12 @@
 
         function mostrarAlerta(texto, ok) {
             const a = document.getElementById('mensaje-alerta'); a.className = `mb-4 p-4 rounded-lg text-sm text-center ${ok ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'}`; a.textContent = texto;
+        }
+
+        function textoNotificacionCorreo(result) {
+            if (result?.sent) return ' También enviamos un correo.';
+            if (result?.reason === 'no_email') return ' La cita no tiene correo asociado.';
+            return ' No se pudo enviar el correo; conserva tu folio.';
         }
 
         async function iniciarSesionCliente(e) {
@@ -245,12 +254,12 @@
         async function reprogramarDesdePerfil(e) {
             if(!e.target.matches('.form-perfil-cita')) return; e.preventDefault(); const f=e.target;
             const r=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_update',folio:f.dataset.folio,fecha:f.elements.fecha.value,hora_inicio:f.elements.hora_inicio.value})});
-            const d=await r.json(); alert(d.message); if(d.success)cargarPerfilCliente();
+            const d=await r.json(); alert(d.message+textoNotificacionCorreo(d.email_notification)); if(d.success)cargarPerfilCliente();
         }
 
         async function gestionarCitaPerfil(e) {
             const folio=e.target.dataset.cancelar; if(!folio)return; if(!confirm('¿Cancelar esta cita?'))return;
-            const r=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_cancel',folio})}); const d=await r.json(); alert(d.message); if(d.success)cargarPerfilCliente();
+            const r=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_cancel',folio})}); const d=await r.json(); alert(d.message+textoNotificacionCorreo(d.email_notification)); if(d.success)cargarPerfilCliente();
         }
 
         async function cerrarSesionCliente() {
@@ -266,8 +275,8 @@
                 if (!d.success) { panel.textContent = d.message; return; }
                 const c = d.cita; panel.innerHTML = `<p><b>Folio:</b> ${c.folio} · <b>Estado:</b> ${c.estado}</p><p>${c.servicio_name} · ${c.fecha} · ${c.hora_inicio.slice(0,5)}–${c.hora_fin.slice(0,5)}</p><p>Barbero: ${c.barbero_nombre||'Sin asignar'}</p>`;
                 if (!['cancelada','completada'].includes(c.estado)) panel.innerHTML += `<form id="form-reprogramar" class="mt-4 grid grid-cols-2 gap-2"><input type="date" id="nueva-fecha" required min="${new Date().toLocaleDateString('en-CA')}" class="bg-gray-700 p-2 rounded"><input type="time" id="nueva-hora" required class="bg-gray-700 p-2 rounded"><button class="col-span-2 bg-amber-500 text-gray-900 font-bold p-2 rounded">Cambiar horario</button></form><button id="cancelar-cita" class="mt-2 text-red-300 underline">Cancelar cita</button>`;
-                const form = document.getElementById('form-reprogramar'); if (form) form.addEventListener('submit', async ev => { ev.preventDefault(); const response=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_update',folio,fecha:document.getElementById('nueva-fecha').value,hora_inicio:document.getElementById('nueva-hora').value})}); const result=await response.json(); alert(result.message); if(result.success) document.getElementById('form-consulta').requestSubmit(); });
-                const cancel = document.getElementById('cancelar-cita'); if(cancel) cancel.addEventListener('click', async()=>{ if(!confirm('¿Cancelar esta cita?'))return; const response=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_cancel',folio})}); const result=await response.json(); alert(result.message); if(result.success) document.getElementById('form-consulta').requestSubmit(); });
+                const form = document.getElementById('form-reprogramar'); if (form) form.addEventListener('submit', async ev => { ev.preventDefault(); const response=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_update',folio,fecha:document.getElementById('nueva-fecha').value,hora_inicio:document.getElementById('nueva-hora').value})}); const result=await response.json(); alert(result.message+textoNotificacionCorreo(result.email_notification)); if(result.success) document.getElementById('form-consulta').requestSubmit(); });
+                const cancel = document.getElementById('cancelar-cita'); if(cancel) cancel.addEventListener('click', async()=>{ if(!confirm('¿Cancelar esta cita?'))return; const response=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_cancel',folio})}); const result=await response.json(); alert(result.message+textoNotificacionCorreo(result.email_notification)); if(result.success) document.getElementById('form-consulta').requestSubmit(); });
             } catch { panel.textContent = 'No se pudo consultar la cita.'; }
         }
     </script>

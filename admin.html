@@ -138,6 +138,11 @@
                         <span>Base de clientes</span>
                         <span id="badge-clientes" class="font-mono text-[11px] text-muted">0</span>
                     </button>
+                    <button
+                        class="tab flex items-center justify-between px-3.5 py-2.5 text-sm font-medium text-muted hover:text-ink border border-transparent transition text-left w-full"
+                        data-tab="correo">
+                        <span>Notificaciones por correo</span>
+                    </button>
                 </nav>
             </div>
 
@@ -345,6 +350,22 @@
                     </div>
                 </section>
 
+                <section id="tab-correo" class="hidden space-y-5">
+                    <div class="flex items-center justify-between gap-4">
+                        <div><h2 class="text-lg font-bold tracking-tight">Diagnóstico de correo</h2><p class="text-xs text-muted">Estado de la configuración y últimos intentos de envío.</p></div>
+                        <button id="actualizar-correo" class="bg-ink text-white text-xs font-semibold px-4 py-2.5">Actualizar diagnóstico</button>
+                    </div>
+                    <div class="bg-white border border-line p-4">
+                        <h3 class="text-sm font-bold mb-3">Configuración detectada por PHP</h3>
+                        <div id="estado-correo" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-muted">Cargando diagnóstico…</div>
+                    </div>
+                    <div class="bg-white border border-line p-4">
+                        <h3 class="text-sm font-bold mb-3">Registro reciente</h3>
+                        <pre id="logs-correo" class="max-h-96 overflow-auto whitespace-pre-wrap break-words bg-neutral-950 text-emerald-100 p-4 text-xs">Cargando…</pre>
+                        <p class="text-[11px] text-muted mt-2">El registro oculta direcciones de correo y nunca guarda contraseñas.</p>
+                    </div>
+                </section>
+
             </main>
         </div>
     </div>
@@ -417,6 +438,7 @@
             loadServicios();
             loadBarberos();
             loadClientes();
+            loadMailDiagnostics();
         }
 
         $('login-form').addEventListener('submit', async e => {
@@ -438,6 +460,24 @@
             await api('api/auth.php', body({ action: 'logout' }));
             location.reload();
         });
+
+        $('actualizar-correo').addEventListener('click', loadMailDiagnostics);
+
+        async function loadMailDiagnostics() {
+            try {
+                const d=await api('api/mail_status.php?logs=1');
+                const checks=[
+                    ['Archivo existe',d.config_file_exists],['Archivo legible',d.config_file_readable],
+                    ['Remitente configurado',d.sender_configured],['Contraseña de aplicación configurada',d.app_password_configured],
+                    ['OpenSSL activo',d.openssl_enabled],['PHPMailer cargado',d.phpmailer_loaded]
+                ];
+                $('estado-correo').innerHTML=checks.map(([label,ok])=>`<div class="flex justify-between border-b border-line py-2"><span>${label}</span><strong class="${ok?'text-emerald-700':'text-red-700'}">${ok?'OK':'FALTA'}</strong></div>`).join('');
+                $('logs-correo').textContent=d.logs?.length?d.logs.join('\n'):'Todavía no hay intentos registrados.';
+            } catch(e) {
+                $('estado-correo').textContent=e.message;
+                $('logs-correo').textContent='No se pudo consultar el registro.';
+            }
+        }
 
         // Navegación Sidebar
         document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
@@ -536,12 +576,12 @@
         async function setStatus(id, estado) {
             if (!estado) return;
             try {
-                await api('api/citas.php', {
+                const result = await api('api/citas.php', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id, estado })
                 });
-                notify(`Estado actualizado: ${estado}`);
+                notify(result.email_notification?.sent ? `Estado actualizado; correo enviado.` : `Estado actualizado: ${estado}`);
                 loadCitas();
             } catch (e) {
                 notify(e.message, 'error');
