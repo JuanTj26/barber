@@ -1,8 +1,9 @@
 <?php
-// Copia este archivo como mail_config.local.php y agrega tu contraseña
-// de aplicación de Google. No pongas aquí la contraseña normal de Gmail.
+// Copia este archivo como mail_config.local.php y configura allí tus datos.
+// No uses la contraseña normal de Gmail ni incluyas la contraseña real aquí.
 return [
-    'username' => 'angelmellodev@gmail.',
-    'app_password' => 'nndoninfzbbumtfl',
-    'from_name' => 'Barbería El Estilo',
+    'username' => 'tu-cuenta@gmail.com',
+    'app_password' => 'PEGA_AQUI_LA_CONTRASENA_DE_APLICACION',
+    'from_name' => 'Barber TECH',
+    'site_url' => '', // Opcional: URL pública del sitio para el botón del correo.
 ];

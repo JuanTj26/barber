@@ -143,7 +143,7 @@ if ($method === 'PUT') {
         $find = $conn->prepare('SELECT id FROM citas WHERE folio=? AND estado IN (\'pendiente\',\'confirmada\')');
         $find->execute([$folio]); $citaId = (int)$find->fetchColumn();
         if (!$citaId) citaJson(['success' => false, 'message' => 'No se encontró una cita activa con ese folio.'], 404);
-        $stmt = $conn->prepare('UPDATE citas SET estado=\'cancelada\' WHERE id=?'); $stmt->execute([$citaId]);
+        $stmt = $conn->prepare('UPDATE citas SET estado=\'cancelada\',motivo_cancelacion=NULL WHERE id=?'); $stmt->execute([$citaId]);
         $emailNotice = notificarCita($conn, $citaId, 'cancelled');
         citaJson(['success' => true, 'message' => 'Cita cancelada.', 'email_notification' => $emailNotice]);
     }
@@ -151,8 +151,17 @@ if ($method === 'PUT') {
     $id = (int)($data['id'] ?? 0);
     $estado = $data['estado'] ?? '';
     if (!$id || !in_array($estado, ['pendiente', 'confirmada', 'cancelada', 'completada'], true)) citaJson(['success' => false, 'message' => 'Datos inválidos.'], 400);
-    $stmt = $conn->prepare('UPDATE citas SET estado=? WHERE id=?');
-    $stmt->execute([$estado, $id]);
+    $motivo = trim($data['motivo_cancelacion'] ?? '');
+    if ($estado === 'cancelada' && $motivo === '') citaJson(['success'=>false,'message'=>'Escribe el motivo de cancelación.'],400);
+    $motivoLength = function_exists('mb_strlen') ? mb_strlen($motivo, 'UTF-8') : strlen($motivo);
+    if ($motivoLength > 500) citaJson(['success'=>false,'message'=>'El motivo no puede superar 500 caracteres.'],400);
+    if ($estado === 'cancelada') {
+        $stmt = $conn->prepare('UPDATE citas SET estado=?,motivo_cancelacion=? WHERE id=?');
+        $stmt->execute([$estado,$motivo,$id]);
+    } else {
+        $stmt = $conn->prepare('UPDATE citas SET estado=?,motivo_cancelacion=NULL WHERE id=?');
+        $stmt->execute([$estado,$id]);
+    }
     $emailNotice = $stmt->rowCount() ? notificarCita($conn, $id, $estado === 'cancelada' ? 'cancelled' : 'status') : ['sent' => false, 'reason' => 'unchanged'];
     citaJson(['success' => true, 'message' => 'Estado actualizado.', 'email_notification' => $emailNotice]);
 }

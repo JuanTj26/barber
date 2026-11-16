@@ -188,7 +188,7 @@
                         <input id="quick-search" type="text" placeholder="Filtrar registro..."
                             class="bg-canvas border border-line focus:border-ink outline-none px-3 py-1.5 text-xs w-56 transition">
                     </div>
-                    <button id="logout-mobile" onclick="$('logout').click()"
+                    <button id="logout-mobile"
                         class="md:hidden text-xs font-medium text-muted underline">
                         Salir
                     </button>
@@ -359,6 +359,10 @@
                         <h3 class="text-sm font-bold mb-3">Configuración detectada por PHP</h3>
                         <div id="estado-correo" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-muted">Cargando diagnóstico…</div>
                     </div>
+                    <div class="bg-white border border-line p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div><h3 class="text-sm font-bold">Recordatorios de mañana</h3><p class="text-xs text-muted mt-1">Envía un correo una sola vez a cada cliente con cita pendiente o confirmada para mañana.</p></div>
+                        <button id="enviar-recordatorios" class="shrink-0 bg-copper text-white text-xs font-semibold px-4 py-2.5">Enviar recordatorios</button>
+                    </div>
                     <div class="bg-white border border-line p-4">
                         <h3 class="text-sm font-bold mb-3">Registro reciente</h3>
                         <pre id="logs-correo" class="max-h-96 overflow-auto whitespace-pre-wrap break-words bg-neutral-950 text-emerald-100 p-4 text-xs">Cargando…</pre>
@@ -367,6 +371,22 @@
                 </section>
 
             </main>
+        </div>
+    </div>
+
+    <div id="cancel-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
+        <button id="cancel-modal-back" class="absolute inset-0 bg-black/50" aria-label="Cerrar ventana"></button>
+        <div class="relative w-full max-w-lg bg-white border border-line p-6 shadow-xl">
+            <div class="flex justify-between items-start gap-4 mb-2">
+                <div><span class="font-mono text-[10px] uppercase tracking-widest text-copper">Acción administrativa</span><h2 id="cancel-modal-title" class="text-lg font-bold mt-1">Cancelar cita</h2></div>
+                <button id="cancel-modal-close" type="button" class="text-muted hover:text-ink" aria-label="Cerrar">✕</button>
+            </div>
+            <p id="cancel-cita-resumen" class="text-xs text-muted mb-4"></p>
+            <form id="cancel-form" class="space-y-4">
+                <input id="cancel-cita-id" type="hidden">
+                <div><label for="cancel-reason" class="block text-xs font-semibold mb-1.5">Motivo de cancelación *</label><textarea id="cancel-reason" required maxlength="500" rows="4" placeholder="Escribe el motivo que recibirá el cliente…" class="w-full border border-line bg-canvas px-3 py-2 text-sm outline-none focus:border-copper"></textarea><p class="text-[11px] text-muted mt-1">El motivo se guardará y se incluirá en el correo al cliente.</p></div>
+                <div class="flex justify-end gap-2"><button type="button" id="cancel-modal-cancel" onclick="closeCancelModal()" class="border border-line px-4 py-2 text-xs">Volver</button><button id="cancel-submit" class="bg-red-700 text-white px-4 py-2 text-xs font-semibold">Cancelar cita</button></div>
+            </form>
         </div>
     </div>
 
@@ -384,6 +404,25 @@
             el.innerHTML = `<span class="w-1.5 h-1.5 ${type === 'error' ? 'bg-red-400' : 'bg-copper'}"></span><span>${msg}</span>`;
             $('toast-container').appendChild(el);
             setTimeout(() => el.remove(), 3200);
+        }
+
+        function setButtonLoading(button, loading, label = 'Procesando…') {
+            if (!button) return;
+            if (loading) {
+                if (!button.dataset.originalHtml) button.dataset.originalHtml = button.innerHTML;
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+                button.innerHTML = `<span class="inline-flex items-center gap-2"><svg class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".25" stroke-width="4"></circle><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path></svg><span>${label}</span></span>`;
+            } else {
+                button.innerHTML = button.dataset.originalHtml || button.innerHTML;
+                delete button.dataset.originalHtml;
+                button.disabled = false;
+                button.removeAttribute('aria-busy');
+            }
+        }
+
+        function setTableLoading(tbodyId, colspan, label = 'Cargando…') {
+            $(tbodyId).innerHTML = `<tr><td colspan="${colspan}" class="p-8 text-center text-xs text-muted"><span class="inline-flex items-center gap-2"><span class="h-4 w-4 animate-spin rounded-full border-2 border-line border-t-copper"></span>${label}</span></td></tr>`;
         }
 
         function getStatusIndicator(estado) {
@@ -443,6 +482,7 @@
 
         $('login-form').addEventListener('submit', async e => {
             e.preventDefault();
+            const button=$('login-submit');setButtonLoading(button,true,'Iniciando…');
             try {
                 const d = await api('api/auth.php', body({
                     action: firstSetup ? 'setup' : 'login',
@@ -453,17 +493,33 @@
                 showDashboard();
             } catch (err) {
                 $('auth-message').textContent = err.message;
+            } finally {
+                setButtonLoading(button,false);
             }
         });
 
-        $('logout').addEventListener('click', async () => {
-            await api('api/auth.php', body({ action: 'logout' }));
-            location.reload();
+        async function logoutAdmin(button) {
+            setButtonLoading(button,true,'Cerrando…');
+            try { await api('api/auth.php', body({ action: 'logout' }));location.reload(); }
+            catch(e){notify(e.message,'error');setButtonLoading(button,false);}
+        }
+        $('logout').addEventListener('click', e => logoutAdmin(e.currentTarget));
+        $('logout-mobile').addEventListener('click', e => logoutAdmin(e.currentTarget));
+
+        $('actualizar-correo').addEventListener('click', e => loadMailDiagnostics(e.currentTarget));
+        $('enviar-recordatorios').addEventListener('click', async () => {
+            if(!confirm('¿Enviar ahora los recordatorios de las citas de mañana?'))return;
+            const button=$('enviar-recordatorios');setButtonLoading(button,true,'Enviando…');
+            try {
+                const result=await api('api/recordatorios.php',{method:'POST'});
+                notify(result.sin_pendientes?'No hay recordatorios pendientes para mañana':`Recordatorios enviados: ${result.enviados}; fallidos: ${result.fallidos}`,result.fallidos?'error':'success');
+                loadMailDiagnostics();
+            } catch(e) { notify(e.message,'error'); }
+            finally { setButtonLoading(button,false); }
         });
 
-        $('actualizar-correo').addEventListener('click', loadMailDiagnostics);
-
-        async function loadMailDiagnostics() {
+        async function loadMailDiagnostics(button = null) {
+            setButtonLoading(button,true,'Consultando…');
             try {
                 const d=await api('api/mail_status.php?logs=1');
                 const checks=[
@@ -476,7 +532,7 @@
             } catch(e) {
                 $('estado-correo').textContent=e.message;
                 $('logs-correo').textContent='No se pudo consultar el registro.';
-            }
+            } finally { setButtonLoading(button,false); }
         }
 
         // Navegación Sidebar
@@ -501,6 +557,7 @@
 
         // CITAS
         async function loadCitas() {
+            setTableLoading('tabla-citas',7,'Cargando agenda…');
             try {
                 citasCache = await api('api/citas.php');
                 const pendientes = citasCache.filter(c => c.estado === 'pendiente').length;
@@ -554,12 +611,12 @@
                     <td class="py-3.5 px-4 text-ink">${c.servicio_name}</td>
                     <td class="py-3.5 px-4 text-ink">${c.barbero_nombre || 'Sin asignar'}</td>
                     <td class="py-3.5 px-4 font-mono text-xs text-muted">#${c.folio}</td>
-                    <td class="py-3.5 px-4">${getStatusIndicator(c.estado)}</td>
+                    <td class="py-3.5 px-4">${getStatusIndicator(c.estado)}${c.estado==='cancelada'&&c.motivo_cancelacion?`<div class="mt-1 max-w-xs text-[11px] text-muted">Motivo: ${escapeHtml(c.motivo_cancelacion)}</div>`:''}</td>
                     <td class="py-3.5 px-4 text-right whitespace-nowrap">
                         <div class="inline-flex items-center gap-1.5">
-                            ${c.estado === 'pendiente' ? `<button onclick="setStatus(${c.id}, 'confirmada')" class="px-2.5 py-1 text-xs font-medium bg-ink text-white hover:bg-neutral-800 transition">Confirmar</button>` : ''}
-                            ${c.estado === 'confirmada' ? `<button onclick="setStatus(${c.id}, 'completada')" class="px-2.5 py-1 text-xs font-medium bg-emerald-700 text-white hover:bg-emerald-800 transition">Completar</button>` : ''}
-                            <select onchange="setStatus(${c.id}, this.value)" aria-label="Cambiar estado"
+                            ${c.estado === 'pendiente' ? `<button onclick="setStatus(${c.id}, 'confirmada', '', this)" class="px-2.5 py-1 text-xs font-medium bg-ink text-white hover:bg-neutral-800 transition">Confirmar</button>` : ''}
+                            ${c.estado === 'confirmada' ? `<button onclick="setStatus(${c.id}, 'completada', '', this)" class="px-2.5 py-1 text-xs font-medium bg-emerald-700 text-white hover:bg-emerald-800 transition">Completar</button>` : ''}
+                            <select onchange="handleStatusChange(${c.id}, this.value, this)" aria-label="Cambiar estado"
                                 class="border border-line bg-canvas px-2 py-1 text-xs text-muted focus:border-ink outline-none cursor-pointer">
                                 <option value="" disabled selected>Más...</option>
                                 ${['pendiente', 'confirmada', 'completada', 'cancelada']
@@ -573,18 +630,63 @@
             `).join('') : '<tr><td colspan="7" class="p-10 text-center text-xs text-muted font-mono">SIN REGISTROS EN ESTA VISTA</td></tr>';
         }
 
-        async function setStatus(id, estado) {
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+        }
+
+        function handleStatusChange(id, estado, control) {
             if (!estado) return;
+            if (estado === 'cancelada') {
+                const cita=citasCache.find(row=>+row.id===id);
+                $('cancel-cita-resumen').textContent=cita?`${cita.cliente_nombre} · ${cita.servicio_name} · folio ${cita.folio}`:'';
+                $('cancel-cita-id').value=id;
+                $('cancel-reason').value='';
+                $('cancel-modal').classList.remove('hidden');
+                $('cancel-reason').focus();
+                return;
+            }
+            setStatus(id,estado,'',control);
+        }
+
+        function closeCancelModal() {
+            $('cancel-modal').classList.add('hidden');
+            $('cancel-cita-id').value='';
+            $('cancel-reason').value='';
+            loadCitas();
+        }
+
+        $('cancel-modal-close').addEventListener('click',closeCancelModal);
+        $('cancel-modal-back').addEventListener('click',closeCancelModal);
+        $('cancel-form').addEventListener('submit',async e=>{
+            e.preventDefault();
+            const id=Number($('cancel-cita-id').value), reason=$('cancel-reason').value.trim();
+            if(!reason){$('cancel-reason').focus();return;}
+            const saved=await setStatus(id,'cancelada',reason,$('cancel-submit'));
+            if(saved&&!$('cancel-modal').classList.contains('hidden'))closeCancelModal();
+        });
+
+        async function setStatus(id, estado, motivoCancelacion = '', control = null) {
+            if (!estado) return false;
+            const isSelect=control?.tagName==='SELECT';
+            let selectSpinner=null;
+            if(isSelect){control.disabled=true;control.setAttribute('aria-busy','true');control.classList.add('opacity-60','cursor-wait');selectSpinner=document.createElement('span');selectSpinner.className='ml-2 inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-line border-t-copper align-middle';selectSpinner.setAttribute('aria-label','Guardando estado');control.insertAdjacentElement('afterend',selectSpinner);}
+            else setButtonLoading(control,true,estado==='cancelada'?'Cancelando…':'Guardando…');
             try {
                 const result = await api('api/citas.php', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, estado })
+                    body: JSON.stringify({ id, estado, motivo_cancelacion: motivoCancelacion })
                 });
                 notify(result.email_notification?.sent ? `Estado actualizado; correo enviado.` : `Estado actualizado: ${estado}`);
                 loadCitas();
+                return true;
             } catch (e) {
                 notify(e.message, 'error');
+                loadCitas();
+                return false;
+            } finally {
+                if(isSelect){control.disabled=false;control.removeAttribute('aria-busy');control.classList.remove('opacity-60','cursor-wait');selectSpinner?.remove();}
+                else setButtonLoading(control,false);
             }
         }
 
@@ -595,6 +697,7 @@
         }
 
         async function loadServicios() {
+            setTableLoading('tabla-servicios',5,'Cargando servicios…');
             try {
                 servicesCache = await api('api/servicios.php');
                 $('badge-servicios').textContent = servicesCache.length;
@@ -606,7 +709,7 @@
                         <td class="py-3.5 px-4 font-mono font-semibold text-sm tabular">$${parseFloat(s.precio).toFixed(2)}</td>
                         <td class="py-3.5 px-4 text-right whitespace-nowrap space-x-3">
                             <button onclick="editService(${s.id})" class="text-xs font-medium text-ink hover:text-copper underline">Editar</button>
-                            <button onclick="deleteService(${s.id})" class="text-xs font-medium text-muted hover:text-red-700">Desactivar</button>
+                            <button onclick="deleteService(${s.id}, this)" class="text-xs font-medium text-muted hover:text-red-700">Desactivar</button>
                         </td>
                     </tr>
                 `).join('') : '<tr><td colspan="5" class="p-10 text-center text-xs text-muted font-mono">NO HAY SERVICIOS ACTIVOS</td></tr>';
@@ -639,6 +742,7 @@
         $('service-form').addEventListener('submit', async e => {
             e.preventDefault();
             const id = $('service-id').value;
+            const button=$('service-submit-btn');setButtonLoading(button,true,'Guardando…');
             const data = {
                 id,
                 nombre: $('service-name').value,
@@ -653,15 +757,17 @@
                     body: JSON.stringify(data)
                 });
                 notify(id ? 'Servicio actualizado' : 'Servicio agregado al catálogo');
+                setButtonLoading(button,false);
                 resetServiceForm();
                 loadServicios();
             } catch (err) {
                 notify(err.message, 'error');
-            }
+            } finally { setButtonLoading(button,false); }
         });
 
-        async function deleteService(id) {
+        async function deleteService(id, button = null) {
             if (!confirm('¿Desactivar este servicio del catálogo?')) return;
+            setButtonLoading(button,true,'Desactivando…');
             try {
                 await api('api/servicios.php', {
                     method: 'DELETE',
@@ -672,11 +778,12 @@
                 loadServicios();
             } catch (e) {
                 notify(e.message, 'error');
-            }
+            } finally { setButtonLoading(button,false); }
         }
 
         // BARBEROS
         async function loadBarberos() {
+            setTableLoading('tabla-barberos',4,'Cargando barberos…');
             try {
                 barberosCache = await api('api/barberos.php?admin=1');
                 $('badge-barberos').textContent = barberosCache.filter(b => +b.activo === 1).length;
@@ -684,7 +791,7 @@
                     <tr class="hover:bg-canvas/50 transition">
                         <td class="py-3.5 px-4 font-semibold">${b.nombre}</td><td class="py-3.5 px-4 text-muted">${b.especialidad || '—'}</td>
                         <td class="py-3.5 px-4">${+b.activo === 1 ? 'Activo' : 'Inactivo'}</td>
-                        <td class="py-3.5 px-4 text-right whitespace-nowrap"><button onclick="editBarber(${b.id})" class="text-xs underline mr-3">Editar</button><button onclick="setBarberActive(${b.id},${+b.activo===1?0:1})" class="text-xs ${+b.activo===1?'text-red-700':'text-emerald-700'}">${+b.activo===1?'Desactivar':'Reactivar'}</button></td>
+                        <td class="py-3.5 px-4 text-right whitespace-nowrap"><button onclick="editBarber(${b.id})" class="text-xs underline mr-3">Editar</button><button onclick="setBarberActive(${b.id},${+b.activo===1?0:1},this)" class="text-xs ${+b.activo===1?'text-red-700':'text-emerald-700'}">${+b.activo===1?'Desactivar':'Reactivar'}</button></td>
                     </tr>`).join('') : '<tr><td colspan="4" class="p-8 text-center text-xs text-muted">Aún no hay barberos registrados.</td></tr>';
             } catch(e) { $('tabla-barberos').innerHTML = `<tr><td colspan="4" class="p-6 text-red-700 text-xs">${e.message}</td></tr>`; }
         }
@@ -698,23 +805,28 @@
         function resetBarberForm() { $('barber-form').reset(); $('barber-id').value=''; $('barber-form-title').textContent='Registrar barbero'; $('barber-submit-btn').textContent='Guardar barbero'; toggleBarberDrawer(false); }
         $('barber-form').addEventListener('submit',async e=>{
             e.preventDefault();const id=$('barber-id').value;
-            try { await api('api/barberos.php',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,nombre:$('barber-name').value,especialidad:$('barber-specialty').value})});notify(id?'Barbero actualizado':'Barbero agregado');resetBarberForm();loadBarberos(); }
+            const button=$('barber-submit-btn');setButtonLoading(button,true,'Guardando…');
+            try { await api('api/barberos.php',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,nombre:$('barber-name').value,especialidad:$('barber-specialty').value})});notify(id?'Barbero actualizado':'Barbero agregado');setButtonLoading(button,false);resetBarberForm();loadBarberos(); }
             catch(err){notify(err.message,'error');}
+            finally {setButtonLoading(button,false);}
         });
         async function deactivateBarber(id) {
             if(!confirm('¿Desactivar este barbero? No aparecerá en nuevas reservaciones.'))return;
             try{await api('api/barberos.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});notify('Barbero desactivado');loadBarberos();}
             catch(e){notify(e.message,'error');}
         }
-        async function setBarberActive(id,activo) {
+        async function setBarberActive(id,activo,button=null) {
             const b=barberosCache.find(x=>+x.id===id);if(!b)return;
             const question=activo?'¿Reactivar a '+b.nombre+' para nuevas reservaciones?':'¿Desactivar a '+b.nombre+'?';if(!confirm(question))return;
+            setButtonLoading(button,true,activo?'Reactivando…':'Desactivando…');
             try{await api('api/barberos.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,activo})});notify(activo?'Barbero reactivado':'Barbero desactivado');loadBarberos();}
             catch(e){notify(e.message,'error');}
+            finally {setButtonLoading(button,false);}
         }
 
         // CLIENTES
         async function loadClientes() {
+            setTableLoading('tabla-clientes',5,'Cargando clientes…');
             try {
                 clientesCache = await api('api/clientes.php');
                 $('kpi-clientes').textContent = clientesCache.length;
