@@ -29,6 +29,8 @@ if ($method === 'POST') {
     $horaObj = DateTime::createFromFormat('H:i', $horaInicio);
     if (!$nombre || strlen($telefono) < 10 || !$servicioId || !$barberoId || !$fechaObj || $fechaObj->format('Y-m-d') !== $fecha || !$horaObj || $horaObj->format('H:i') !== $horaInicio || ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) || ($clientPassword && (!$email || strlen($clientPassword) < 8))) citaJson(['success' => false, 'message' => 'Revisa los datos y selecciona un barbero. Para crear cuenta se requieren correo válido y contraseña de al menos 8 caracteres.'], 400);
     if ($fecha < date('Y-m-d')) citaJson(['success' => false, 'message' => 'No puedes reservar en una fecha pasada.'], 400);
+    if ((int)$fechaObj->format('w') === 0) citaJson(['success' => false, 'message' => 'Los domingos la barbería permanece cerrada. Por favor selecciona una fecha de lunes a sábado.'], 400);
+    if ($horaInicio < '10:00' || $horaInicio > '19:30') citaJson(['success' => false, 'message' => 'El horario de atención es de 10:00 a 20:00. Selecciona una hora entre 10:00 y 19:30.'], 400);
     $stmt = $conn->prepare('SELECT duracion_minutos FROM servicios WHERE id = ? AND activo = 1');
     $stmt->execute([$servicioId]);
     $service = $stmt->fetch();
@@ -38,7 +40,7 @@ if ($method === 'POST') {
     $start = DateTime::createFromFormat('Y-m-d H:i', "$fecha $horaInicio");
     $end = clone $start;
     $end->modify('+' . (int)$service['duracion_minutos'] . ' minutes');
-    if ($end->format('Y-m-d') !== $fecha) citaJson(['success' => false, 'message' => 'La cita debe terminar el mismo día.'], 400);
+    if ($end->format('Y-m-d') !== $fecha || $end->format('H:i:s') > '20:00:00') citaJson(['success' => false, 'message' => 'La cita debe iniciar y terminar dentro del horario laboral (10:00 a 20:00).'], 400);
     $horaFin = $end->format('H:i:s');
     $folio = strtoupper(bin2hex(random_bytes(5)));
     try {
@@ -93,6 +95,8 @@ if ($method === 'PUT') {
         $dateObj = DateTime::createFromFormat('Y-m-d', $fecha);
         $timeObj = DateTime::createFromFormat('H:i', $hora);
         if (!$folio || !$dateObj || $dateObj->format('Y-m-d') !== $fecha || !$timeObj || $timeObj->format('H:i') !== $hora || $fecha < date('Y-m-d')) citaJson(['success' => false, 'message' => 'Fecha u hora inválida.'], 400);
+        if ((int)$dateObj->format('w') === 0) citaJson(['success' => false, 'message' => 'Los domingos la barbería permanece cerrada. Elige de lunes a sábado.'], 400);
+        if ($hora < '10:00' || $hora > '19:30') citaJson(['success' => false, 'message' => 'El horario de atención es de 10:00 a 20:00. Elige una hora entre 10:00 y 19:30.'], 400);
         try {
             $conn->beginTransaction();
                 $stmt = $conn->prepare('SELECT c.id,c.servicio_id,c.barbero_id,c.estado,s.duracion_minutos,b.nombre AS barbero_nombre FROM citas c JOIN servicios s ON s.id=c.servicio_id LEFT JOIN barberos b ON b.id=c.barbero_id WHERE c.folio=? FOR UPDATE');
@@ -113,9 +117,9 @@ if ($method === 'PUT') {
             $start = DateTime::createFromFormat('Y-m-d H:i', "$fecha $hora");
             $end = clone $start;
             $end->modify('+' . (int)$old['duracion_minutos'] . ' minutes');
-            if ($end->format('Y-m-d') !== $fecha) {
+            if ($end->format('Y-m-d') !== $fecha || $end->format('H:i:s') > '20:00:00') {
                 $conn->rollBack();
-                citaJson(['success' => false, 'message' => 'La cita debe terminar el mismo día.'], 400);
+                citaJson(['success' => false, 'message' => 'La cita debe iniciar y terminar dentro del horario laboral (10:00 a 20:00).'], 400);
             }
             $stmt = $conn->prepare('SELECT id FROM citas WHERE fecha=? AND (barbero_id=? OR barbero_id IS NULL) AND id<>? AND estado<>\'cancelada\' AND (? < hora_fin AND ? > hora_inicio) FOR UPDATE');
             $stmt->execute([$fecha, $old['barbero_id'], $old['id'], $hora . ':00', $end->format('H:i:s')]);

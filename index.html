@@ -1,333 +1,603 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barber Tech - Reserva tu Cita</title>
+    <title>Barbería El Estilo - Reserva tu Cita</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    },
+                    colors: {
+                        ink: '#0A0A0A',
+                        bone: '#FAF8F3',
+                        gold: '#C9A24B',
+                        'line-light': '#E6DFD0',
+                        'line-dark': '#262626',
+                        muted: {
+                            light: '#6B6558',
+                            dark: '#A39D8F',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0A0A0A;
+            color: #FAF8F3;
+            font-family: 'Inter', sans-serif;
+        }
+
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 2px solid #C9A24B;
+            outline-offset: 2px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0A0A0A;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #262626;
+            border-radius: 9999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #C9A24B;
+        }
+
+        /* Ocultar scrollbar en carrusel horizontal */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans antialiased">
+
+<body class="font-sans antialiased text-bone bg-ink min-h-screen flex flex-col selection:bg-gold selection:text-ink">
 
     <!-- Navbar -->
     <nav class="bg-gray-800 border-b border-gray-700">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold tracking-wider text-amber-500">BARBER TECH 💈</h1>
-            <a href="admin.html" class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg transition">Acceso Admin ⚙️</a>
+            <h1 class="text-xl font-bold tracking-wider text-amber-500">BARBERÍA EL ESTILO 💈</h1>
+            <a href="admin.html" class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg transition">Acceso
+                Admin ⚙️</a>
         </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <header class="py-16 text-center bg-gradient-to-b from-gray-800 to-gray-900 px-4">
-        <h2 class="text-4xl font-extrabold mb-4">Cortes y Estilo Profesional</h2>
-        <p class="text-gray-400 max-w-xl mx-auto mb-8">Agenda tu cita en segundos. Sin filas, con la mejor atención y productos especializados para tu barba y cabello.</p>
-        <a href="#reservar" class="bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-6 py-3 rounded-xl shadow-lg transition">Reservar Ahora</a>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 py-12 space-y-16">
-        
-        <!-- Catálogo de Servicios -->
-        <section>
-            <h3 class="text-2xl font-bold text-center mb-8 text-amber-400">Nuestros Servicios</h3>
-            <div id="grid-servicios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Cargado dinámicamente por JS -->
+        <div id="panel-menu-movil"
+            class="fixed inset-0 z-50 bg-ink/95 backdrop-blur-xl md:hidden transition-opacity duration-300 opacity-0 pointer-events-none flex flex-col justify-between p-8"
+            aria-hidden="true">
+            <div>
+                <div class="flex justify-between items-center pb-6 border-b border-line-dark">
+                    <span class="font-serif text-xl font-bold text-bone">Tech Barbería <span
+                            class="text-xs font-sans text-muted-dark">UTN</span></span>
+                    <button id="btn-cerrar-menu-movil" class="text-muted-dark hover:text-bone p-2 focus:outline-none"
+                        aria-label="Cerrar menú">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <nav class="flex flex-col gap-6 mt-10 text-lg font-serif">
+                    <a href="#servicios"
+                        class="enlace-movil text-muted-dark hover:text-bone transition-colors">Servicios</a>
+                    <a href="#barberos"
+                        class="enlace-movil text-muted-dark hover:text-bone transition-colors">Barberos</a>
+                    <a href="#consultar-cita"
+                        class="enlace-movil text-muted-dark hover:text-bone transition-colors">Consultar cita</a>
+                    <a href="#cuenta-cliente" class="enlace-movil text-muted-dark hover:text-bone transition-colors">Mi
+                        cuenta</a>
+                </nav>
             </div>
+            <div class="pt-6 border-t border-line-dark">
+                <a href="#reservar"
+                    class="enlace-movil block w-full text-center py-3.5 rounded-full bg-gold text-ink font-medium text-sm tracking-wider uppercase">
+                    Agendar cita
+                </a>
+                <p class="text-xs text-muted-dark text-center mt-4 font-sans">Lunes a Sábado 10:00 – 20:00 · Campus UTN
+                </p>
+            </div>
+        </div>
+        </header>
+
+        <!-- HERO: Editorial Avant-Garde / High-Fashion Brutalist Barbería (Composición Hanbok Editorial Calibrada) -->
+        <section
+            class="relative min-h-[92vh] bg-[#EDEAE3] text-ink overflow-hidden border-b border-[#D8D4CA] pt-6 pb-8 sm:pb-12 flex flex-col justify-between selection:bg-ink selection:text-bone">
+
+            <!-- ÁREA PRINCIPAL MONUMENTAL -->
+            <div class="relative w-full max-w-[94%] mx-auto my-auto py-2 sm:py-6">
+
+                <!-- TÍTULO GIGANTE "BARBER" (Fotos exactamente en medio de A-R y E-R, POR DETRÁS de las letras con z-0 vs z-10) -->
+                <div class="relative w-full select-none mb-2 sm:mb-4">
+
+                    <!-- FOTO 1: POR DETRÁS, EN MEDIO DE LA A Y LA R (Versión compacta y elegante) -->
+                    <div class="absolute left-[31%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none">
+                        <div
+                            class="w-16 sm:w-24 md:w-32 lg:w-40 h-20 sm:h-28 md:h-36 lg:h-48 overflow-hidden rounded-sm shadow-md">
+                            <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=85"
+                                alt="Corte y barbería en acción"
+                                class="w-full h-full object-cover saturate-[1.25] contrast-[1.05] opacity-100">
+                        </div>
+                    </div>
+
+                    <!-- FOTO 2: POR DETRÁS, EN MEDIO DE LA E Y LA R (Versión compacta y elegante) -->
+                    <div class="absolute left-[80%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none">
+                        <div
+                            class="w-16 sm:w-24 md:w-32 lg:w-40 h-20 sm:h-28 md:h-36 lg:h-48 overflow-hidden rounded-sm shadow-md">
+                            <img src="https://images.unsplash.com/photo-1512690459411-b9245aed614b?auto=format&fit=crop&w=800&q=85"
+                                alt="Ritual clásico de afeitado"
+                                class="w-full h-full object-cover saturate-[1.25] contrast-[1.05] opacity-100">
+                        </div>
+                    </div>
+
+                    <!-- LAS 6 LETRAS GIGANTES "B A R B E R" EN EL FRENTE (Con halo editorial #EDEAE3 para recorte nítido sobre fotos oscuras) -->
+                    <div class="relative z-10 font-serif font-black text-[15vw] sm:text-[16vw] lg:text-[17vw] leading-[0.82] tracking-tighter text-ink flex justify-between items-center w-full"
+                        style="text-shadow: 0 0 2px #EDEAE3, 0 0 4px #EDEAE3, 0 0 6px #EDEAE3;">
+                        <span>B</span>
+                        <span>A</span>
+                        <span>R</span>
+                        <span>B</span>
+                        <span>E</span>
+                        <span>R</span>
+                    </div>
+                </div>
+
+                <!-- COMPOSICIÓN EDITORIAL: TEXTO A LA IZQUIERDA + FOTO ESTRELLA A COLOR A LA DERECHA -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative pt-2 sm:pt-4">
+
+                    <!-- COLUMNA IZQUIERDA: Subtítulo Monumental + Párrafo + CTAs -->
+                    <div class="lg:col-span-7 xl:col-span-7 space-y-6 text-left relative z-20">
+
+                        <!-- Subtítulo en 2 líneas idéntico a "FROM TRADITION TO MODERN WORLD" -->
+                        <h2
+                            class="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tight text-ink leading-[0.96]">
+                            De la tradición <br>
+                            <span class="relative inline-block mt-1">
+                                <!-- Mini foto vertical intersecada detrás de "al mundo moderno" -->
+                                <!-- Mini foto vertical intersecada detrás de "al mundo moderno" (A color original sin borde blanco) -->
+                                <div
+                                    class="absolute -left-3 sm:-left-6 -top-2 w-12 sm:w-16 md:w-20 h-16 sm:h-24 md:h-28 overflow-hidden -z-10 opacity-75 shadow-md pointer-events-none rounded-sm">
+                                    <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=600&q=80"
+                                        alt="Navaja tradicional" class="w-full h-full object-cover saturate-[1.2]">
+                                </div>
+                                al mundo moderno
+                            </span>
+                        </h2>
+
+                        <!-- Párrafo editorial descriptivo -->
+                        <div class="max-w-md space-y-5 pt-2">
+                            <p class="text-xs sm:text-sm text-[#454035] font-normal leading-relaxed font-sans">
+                                El afeitado tradicional a navaja y el visagismo contemporáneo se fusionan. Una
+                                experiencia
+                                de barbería artesanal adaptada con máxima precisión técnica y reserva digital inmediata
+                                en
+                                Campus UTN.
+                            </p>
+
+                            <!-- Botones de Acción Editorial -->
+                            <div class="flex flex-wrap items-center gap-4 pt-1">
+                                <a href="#reservar"
+                                    class="inline-flex items-center justify-center px-8 py-3.5 rounded-full bg-ink text-bone hover:bg-gold hover:text-ink text-xs font-semibold uppercase tracking-widest transition-all duration-200 shadow-md transform hover:-translate-y-0.5">
+                                    Agendar cita
+                                </a>
+                                <a href="#servicios"
+                                    class="inline-flex items-center gap-2 text-xs uppercase tracking-widest font-semibold text-ink hover:text-gold transition-colors py-3">
+                                    Ver catálogo <span>→</span>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- COLUMNA DERECHA: Carrusel Automático de Fotos en Foco (Sin bordes blancos) -->
+                    <div
+                        class="lg:col-span-5 xl:col-span-5 relative z-30 flex justify-center lg:justify-end lg:-mt-10 xl:-mt-16">
+                        <div
+                            class="relative w-full max-w-[280px] sm:max-w-[340px] md:max-w-[380px] lg:max-w-[420px] shadow-2xl transition-transform duration-500 hover:scale-[1.01]">
+                            <div id="hero-slider"
+                                class="relative overflow-hidden shadow-2xl bg-bone h-[340px] sm:h-[440px] md:h-[500px] lg:h-[540px] rounded-sm">
+
+                                <!-- Foto 1: Visagismo y Estilo -->
+                                <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=1000&q=85"
+                                    alt="Visagismo & Estilo Tech Barbería"
+                                    class="hero-slide absolute inset-0 w-full h-full object-cover object-top saturate-[1.25] contrast-[1.05] opacity-100 transition-opacity duration-1000 ease-in-out">
+
+                                <!-- Foto 2: Fade Contemporáneo -->
+                                <img src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=1000&q=85"
+                                    alt="Fade Contemporáneo"
+                                    class="hero-slide absolute inset-0 w-full h-full object-cover object-top saturate-[1.25] contrast-[1.05] opacity-0 transition-opacity duration-1000 ease-in-out">
+
+                                <!-- Foto 3: Barbero en Acción con Tijera -->
+                                <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1000&q=85"
+                                    alt="Barbero en acción"
+                                    class="hero-slide absolute inset-0 w-full h-full object-cover object-top saturate-[1.25] contrast-[1.05] opacity-0 transition-opacity duration-1000 ease-in-out">
+
+                                <!-- Foto 4: Navaja Tradicional y Perfilado -->
+                                <img src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=1000&q=85"
+                                    alt="Ritual de precisión"
+                                    class="hero-slide absolute inset-0 w-full h-full object-cover object-top saturate-[1.25] contrast-[1.05] opacity-0 transition-opacity duration-1000 ease-in-out">
+
+                                <!-- Indicador sutil de progreso en la base de la imagen -->
+                                <div class="absolute bottom-0 inset-x-0 h-1 bg-black/25 flex">
+                                    <div id="hero-progress-bar"
+                                        class="h-full bg-gold transition-all duration-500 w-1/4">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- PARTE INFERIOR: FRANJA PANORÁMICA CON FOTO DE BARBERÍA + LETRAS BLANCAS "BARBERÍA" -->
+            <div class="relative w-full overflow-hidden mt-6 bg-ink border-t border-line-dark">
+
+                <!-- FOTO DE BARBERÍA EN EL FONDO (Detrás de las letras blancas para máximo contraste) -->
+                <div class="absolute inset-0 z-0">
+                    <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=2000&q=80"
+                        alt="Barbería UTN fondo"
+                        class="w-full h-full object-cover object-center saturate-125 brightness-[0.38]">
+                    <div class="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/60 to-ink/95"></div>
+                </div>
+
+                <!-- LETRAS BLANCAS GIGANTES "BARBERÍA" (Completas, iluminadas y sin cortes) -->
+                <div
+                    class="absolute inset-0 flex items-center justify-end pr-6 select-none pointer-events-none z-10 overflow-hidden">
+                    <span
+                        class="font-serif font-black text-[13vw] sm:text-[11vw] lg:text-[9.5vw] text-white/35 tracking-tight whitespace-nowrap leading-none drop-shadow-md">
+                        BARBERÍA
+                    </span>
+                </div>
+
+                <!-- HORARIOS EN PRIMER PLANO -->
+                <div
+                    class="relative z-20 max-w-[94%] mx-auto py-4 sm:py-5 flex items-center justify-end text-xs uppercase tracking-widest text-bone/90 font-sans">
+                    <div>
+                        <span class="text-gold font-semibold">Lunes a Sábado</span> · 10:00 — 20:00
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Script de Rotación Automática Suave en Hero -->
+            <script>
+                    (function () {
+                        function autoPlayHero() {
+                            const slides = document.querySelectorAll('.hero-slide');
+                            const bar = document.getElementById('hero-progress-bar');
+                            if (!slides || slides.length < 2) return;
+                            let current = 0;
+                            const total = slides.length;
+                            setInterval(function () {
+                                slides[current].classList.remove('opacity-100');
+                                slides[current].classList.add('opacity-0');
+                                current = (current + 1) % total;
+                                slides[current].classList.remove('opacity-0');
+                                slides[current].classList.add('opacity-100');
+                                if (bar) {
+                                    bar.style.width = ((current + 1) / total * 100) + '%';
+                                }
+                            }, 3500);
+                        }
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', autoPlayHero);
+                        } else {
+                            autoPlayHero();
+                        }
+                    })();
+            </script>
+
         </section>
 
-        <!-- Formulario de Reserva -->
-        <section id="reservar" class="max-w-xl mx-auto bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-700">
-            <h3 class="text-2xl font-bold mb-6 text-center text-amber-400">Aparta tu Cita</h3>
-            
-            <div id="mensaje-alerta" class="hidden mb-4 p-4 rounded-lg text-sm text-center"></div>
-
-            <form id="form-cita" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Nombre Completo</label>
-                    <input type="text" id="nombre" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
+        <!-- En index.html se cargan los componentes que siguen o los includes en index.php -->
+        <div id="contenedor-resto-sitio">
+            <!-- SERVICIOS -->
+            <section id="servicios" class="scroll-mt-24 bg-bone text-ink py-24 border-b border-line-light">
+                <div class="max-w-6xl mx-auto px-6">
+                    <div
+                        class="flex flex-col md:flex-row md:items-end justify-between mb-16 pb-6 border-b border-line-light gap-4">
+                        <div>
+                            <h2 class="font-serif text-3xl sm:text-5xl font-bold text-ink">Cortes & Tratamientos</h2>
+                        </div>
+                        <p class="text-muted-light text-sm max-w-sm font-normal">
+                            Precios transparentes y tiempos dedicados con esmero a cada cliente en el campus.
+                        </p>
+                    </div>
+                    <div id="grid-servicios" class="divide-y divide-line-light"></div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Teléfono (10 Dígitos)</label>
-                        <input type="number" id="telefono" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
+            </section>
+
+            <!-- SECCIÓN DE BARBEROS: Carrusel Dinámico de Maestros Barberos -->
+            <section id="barberos"
+                class="scroll-mt-24 bg-ink text-bone py-24 sm:py-32 border-b border-line-dark overflow-hidden">
+                <div class="max-w-6xl mx-auto px-6">
+
+                    <div
+                        class="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-6 border-b border-line-dark gap-6">
+                        <div>
+                            <h2 class="font-serif text-3xl sm:text-5xl font-bold text-bone">Maestros Barberos</h2>
+                        </div>
+                        <div class="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto">
+                            <p class="text-muted-dark text-sm max-w-xs font-normal leading-relaxed hidden sm:block">
+                                Técnicos certificados con dominio en visagismo, tijera clásica y navaja libre en el
+                                campus
+                                UTN.
+                            </p>
+                            <!-- Controles del Carrusel (Flechas de navegación) -->
+                            <div class="flex items-center gap-3">
+                                <button id="btn-barberos-prev" type="button" aria-label="Ver barbero anterior"
+                                    class="w-12 h-12 rounded-full border border-line-dark hover:border-gold text-bone hover:text-gold flex items-center justify-center transition-all duration-200 bg-ink hover:bg-white/5 active:scale-95 shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                            d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <button id="btn-barberos-next" type="button" aria-label="Ver siguiente barbero"
+                                    class="w-12 h-12 rounded-full border border-line-dark hover:border-gold text-bone hover:text-gold flex items-center justify-center transition-all duration-200 bg-ink hover:bg-white/5 active:scale-95 shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Correo (Opcional)</label>
-                        <input type="email" id="email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
+
+                    <!-- Contenedor del Carrusel (Scroll suave + Snap horizontal + Arrastre) -->
+                    <div class="relative">
+                        <div id="grid-barberos"
+                            class="flex gap-8 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 no-scrollbar -mx-2 px-2 cursor-grab active:cursor-grabbing">
+                            <div
+                                class="min-w-[280px] p-8 border border-line-dark rounded-lg animate-pulse text-muted-dark text-sm">
+                                Cargando barberos...
+                            </div>
+                        </div>
                     </div>
-                <details class="rounded-lg bg-gray-700 p-4">
-                    <summary class="cursor-pointer font-medium">Crear cuenta de cliente (opcional)</summary>
-                    <p class="mt-2 text-sm text-gray-300">Puedes reservar como invitado. Para registrarte, agrega una contraseña.</p>
-                    <input type="password" id="password-cliente" minlength="8" placeholder="Contraseña (mínimo 8 caracteres)" class="mt-3 w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2">
+                    <button type="submit"
+                        class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-3 rounded-xl transition mt-4">Confirmar
+                        Cita</button>
+                    </form>
+            </section>
+
+            <section class="max-w-xl mx-auto bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-700">
+                <h3 class="text-2xl font-bold mb-4 text-center text-amber-400">Consultar o modificar una cita</h3>
+                <form id="form-consulta" class="flex gap-2"><input id="folio-consulta" required
+                        placeholder="Folio de tu cita"
+                        class="min-w-0 flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2"><button
+                        class="bg-amber-500 text-gray-900 font-bold px-4 rounded-lg">Consultar</button></form>
+                <div id="resultado-cita" class="mt-4 text-sm"></div>
+            </section>
+
+            <section class="max-w-xl mx-auto bg-gray-800 p-6 rounded-2xl border border-gray-700">
+                <details>
+                    <summary class="cursor-pointer text-amber-400 font-semibold">¿Ya tienes cuenta de cliente? Inicia
+                        sesión</summary>
+                    <form id="form-login-cliente" class="grid gap-3 mt-4"><input id="login-email-cliente" type="email"
+                            required placeholder="Correo" class="bg-gray-700 rounded-lg px-4 py-2"><input
+                            id="login-password-cliente" type="password" required placeholder="Contraseña"
+                            class="bg-gray-700 rounded-lg px-4 py-2"><button class="bg-gray-600 rounded-lg py-2">Usar
+                            mis datos guardados</button></form>
+                    <p id="mensaje-login-cliente" class="mt-2 text-sm"></p>
                 </details>
+            </section>
+
+            <section id="perfil-cliente"
+                class="hidden max-w-3xl mx-auto bg-gray-800 p-6 rounded-2xl border border-gray-700">
+                <div class="flex justify-between items-center gap-3 mb-4">
+                    <h3 class="text-2xl font-bold text-amber-400">Mi perfil y mis citas</h3><button
+                        id="cerrar-sesion-cliente" class="text-sm underline text-gray-300">Cerrar sesión</button>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Selecciona el Servicio</label>
-                    <select id="servicio_id" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
-                        <option value="">Cargando servicios...</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Barbero de tu preferencia</label>
-                    <select id="barbero_id" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
-                        <option value="">Cargando barberos...</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Fecha</label>
-                        <input type="date" id="fecha" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Hora de Inicio</label>
-                        <input type="time" id="hora_inicio" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
-                    </div>
-                </div>
-                <button id="btn-submit-cita" type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-3 rounded-xl transition mt-4">Confirmar Cita</button>
-            </form>
-        </section>
+                <div id="datos-perfil" class="text-sm text-gray-300 mb-5"></div>
+                <div id="citas-perfil" class="space-y-3"></div>
+            </section>
 
-        <section class="max-w-xl mx-auto bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-700">
-            <h3 class="text-2xl font-bold mb-4 text-center text-amber-400">Consultar o modificar una cita</h3>
-            <form id="form-consulta" class="flex gap-2"><input id="folio-consulta" required placeholder="Folio de tu cita" class="min-w-0 flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2"><button id="btn-consultar-cita" class="bg-amber-500 text-gray-900 font-bold px-4 rounded-lg">Consultar</button></form>
-            <div id="resultado-cita" class="mt-4 text-sm"></div>
-        </section>
+            </main>
 
-        <section class="max-w-xl mx-auto bg-gray-800 p-6 rounded-2xl border border-gray-700">
-            <details><summary class="cursor-pointer text-amber-400 font-semibold">¿Ya tienes cuenta de cliente? Inicia sesión</summary>
-                <form id="form-login-cliente" class="grid gap-3 mt-4"><input id="login-email-cliente" type="email" required placeholder="Correo" class="bg-gray-700 rounded-lg px-4 py-2"><input id="login-password-cliente" type="password" required placeholder="Contraseña" class="bg-gray-700 rounded-lg px-4 py-2"><button id="btn-login-cliente" class="bg-gray-600 rounded-lg py-2">Usar mis datos guardados</button></form><p id="mensaje-login-cliente" class="mt-2 text-sm"></p>
-            </details>
-        </section>
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-center py-6 text-gray-500 text-sm border-t border-gray-700 mt-16">
+                <p>&copy; 2026 Barbería El Estilo. Proyecto Escolar.</p>
+            </footer>
 
-        <section id="perfil-cliente" class="hidden max-w-3xl mx-auto bg-gray-800 p-6 rounded-2xl border border-gray-700">
-            <div class="flex justify-between items-center gap-3 mb-4"><h3 class="text-2xl font-bold text-amber-400">Mi perfil y mis citas</h3><button id="cerrar-sesion-cliente" class="text-sm underline text-gray-300">Cerrar sesión</button></div>
-            <div id="datos-perfil" class="text-sm text-gray-300 mb-5"></div><div id="citas-perfil" class="space-y-3"></div>
-        </section>
+            <!-- JavaScript -->
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    cargarServiciosEnLanding();
+                    cargarBarberosEnLanding();
 
-    </main>
+                    // Asignar fecha mínima de hoy en el input date
+                    const now = new Date();
+                    const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+                    document.getElementById('fecha').min = today;
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-center py-6 text-gray-500 text-sm border-t border-gray-700 mt-16">
-        <p>&copy; 2026 Barber TECH.</p>
-    </footer>
+                    document.getElementById('form-cita').addEventListener('submit', enviarCita);
+                    document.getElementById('form-consulta').addEventListener('submit', consultarCita);
+                    document.getElementById('form-login-cliente').addEventListener('submit', iniciarSesionCliente);
+                    document.getElementById('cerrar-sesion-cliente').addEventListener('click', cerrarSesionCliente);
+                    document.getElementById('citas-perfil').addEventListener('click', gestionarCitaPerfil);
+                    document.getElementById('citas-perfil').addEventListener('submit', reprogramarDesdePerfil);
+                    fetch('api/auth.php?action=status').then(r => r.json()).then(s => { if (s.cliente) cargarPerfilCliente(); }).catch(() => { });
+                });
 
-    <!-- JavaScript -->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            cargarServiciosEnLanding();
-            cargarBarberosEnLanding();
+                async function cargarServiciosEnLanding() {
+                    try {
+                        const res = await fetch('api/servicios.php');
+                        const servicios = await res.json();
 
-            // Asignar fecha mínima de hoy en el input date
-            const now = new Date();
-            const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
-            document.getElementById('fecha').min = today;
+                        const grid = document.getElementById('grid-servicios');
+                        const select = document.getElementById('servicio_id');
 
-            document.getElementById('form-cita').addEventListener('submit', enviarCita);
-            document.getElementById('form-consulta').addEventListener('submit', consultarCita);
-            document.getElementById('form-login-cliente').addEventListener('submit', iniciarSesionCliente);
-            document.getElementById('cerrar-sesion-cliente').addEventListener('click', cerrarSesionCliente);
-            document.getElementById('citas-perfil').addEventListener('click', gestionarCitaPerfil);
-            document.getElementById('citas-perfil').addEventListener('submit', reprogramarDesdePerfil);
-            fetch('api/auth.php?action=status').then(r=>r.json()).then(s=>{if(s.cliente) cargarPerfilCliente();}).catch(()=>{});
-        });
+                        grid.innerHTML = '';
+                        select.innerHTML = '<option value="">Selecciona un servicio</option>';
 
-        function setButtonLoading(button, loading, label = 'Procesando…') {
-            if (!button) return;
-            if (loading) {
-                if (!button.dataset.originalHtml) button.dataset.originalHtml = button.innerHTML;
-                button.disabled = true;
-                button.setAttribute('aria-busy', 'true');
-                button.innerHTML = `<span class="inline-flex items-center justify-center gap-2"><svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".25" stroke-width="4"></circle><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path></svg><span>${label}</span></span>`;
-            } else {
-                button.innerHTML = button.dataset.originalHtml || button.innerHTML;
-                delete button.dataset.originalHtml;
-                button.disabled = false;
-                button.removeAttribute('aria-busy');
-            }
-        }
-
-        async function cargarServiciosEnLanding() {
-            const grid=document.getElementById('grid-servicios');
-            const select=document.getElementById('servicio_id');
-            grid.innerHTML='<div class="col-span-full flex items-center justify-center gap-2 py-8 text-sm text-gray-400"><span class="h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-amber-400"></span>Cargando servicios…</div>';
-            try {
-                const res = await fetch('api/servicios.php');
-                const servicios = await res.json();
-                
-                grid.innerHTML = '';
-                select.innerHTML = '<option value="">Selecciona un servicio</option>';
-
-                servicios.forEach(s => {
-                    // Tarjeta visual
-                    grid.innerHTML += `
+                        servicios.forEach(s => {
+                            // Tarjeta visual
+                            grid.innerHTML += `
                         <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 flex flex-col justify-between shadow-md">
                             <div>
-                                <h4 class="text-lg font-bold text-amber-400 mb-2">${s.nombre}</h4>
-                                <p class="text-gray-400 text-sm mb-4">${s.descripcion}</p>
+                                <label for="fecha"
+                                    class="block text-xs uppercase tracking-wider text-muted-light font-medium mb-2">Fecha
+                                    *</label>
+                                <input type="date" id="fecha" required
+                                    class="w-full bg-bone border border-line-light rounded-lg px-4 py-3 text-ink text-sm focus:border-gold focus:outline-none">
                             </div>
-                            <div class="flex justify-between items-center border-t border-gray-700 pt-4 mt-2">
-                                <span class="text-xl font-bold text-white">$${s.precio} MXN</span>
-                                <span class="text-xs bg-gray-700 px-2.5 py-1 rounded-full text-gray-300">${s.duracion_minutos} min</span>
+                            <div>
+                                <label for="hora_inicio"
+                                    class="block text-xs uppercase tracking-wider text-muted-light font-medium mb-2">Hora
+                                    de entrada *</label>
+                                <input type="time" id="hora_inicio" required
+                                    class="w-full bg-bone border border-line-light rounded-lg px-4 py-3 text-ink text-sm focus:border-gold focus:outline-none">
                             </div>
                         </div>
                     `;
 
-                    // Opciones del select
-                    select.innerHTML += `<option value="${s.id}">${s.nombre} ($${s.precio} - ${s.duracion_minutos} min)</option>`;
-                });
-            } catch (error) {
-                console.error("Error al cargar servicios:", error);
-                grid.innerHTML = '<p class="col-span-full text-center text-sm text-red-300">No se pudieron cargar los servicios. Recarga la página para intentarlo de nuevo.</p>';
-                select.innerHTML = '<option value="">Servicios no disponibles</option>';
-            }
-        }
-
-        async function cargarBarberosEnLanding() {
-            const select=document.getElementById('barbero_id');
-            select.disabled=true;
-            try {
-                const r=await fetch('api/barberos.php'); const barberos=await r.json();
-                select.innerHTML='<option value="">Selecciona un barbero</option>';
-                barberos.forEach(b=>select.insertAdjacentHTML('beforeend',`<option value="${b.id}">${b.nombre}${b.especialidad?' — '+b.especialidad:''}</option>`));
-                if(!barberos.length) select.innerHTML='<option value="">Aún no hay barberos disponibles</option>';
-            } catch(e) { select.innerHTML='<option value="">No se pudieron cargar los barberos</option>'; }
-            finally { select.disabled=false; }
-        }
-
-        async function enviarCita(e) {
-            e.preventDefault();
-            const alerta = document.getElementById('mensaje-alerta');
-
-            const datos = {
-                nombre: document.getElementById('nombre').value,
-                telefono: document.getElementById('telefono').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password-cliente').value,
-                servicio_id: document.getElementById('servicio_id').value,
-                barbero_id: document.getElementById('barbero_id').value,
-                fecha: document.getElementById('fecha').value,
-                hora_inicio: document.getElementById('hora_inicio').value
-            };
-
-            const password = document.getElementById('password-cliente').value;
-            if (password && password.length < 8) { mostrarAlerta('La contraseña debe tener al menos 8 caracteres.', false); return; }
-
-            const submitButton=document.getElementById('btn-submit-cita');
-            setButtonLoading(submitButton,true,'Agendando…');
-            try {
-                const res = await fetch('api/citas.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(datos)
-                });
-                const resultado = await res.json();
-
-                alerta.classList.remove('hidden');
-                if (resultado.success) {
-                    alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-green-900 text-green-200 border border-green-700";
-                    const emailInfo = resultado.email_notification?.sent
-                        ? '<br>También enviamos la confirmación a tu correo.'
-                        : datos.email ? '<br>No se pudo enviar el correo; conserva tu folio para consultar la cita.' : '<br>Agrega un correo si quieres recibir avisos.';
-                    alerta.innerHTML = `${resultado.message}<br><strong>Guarda tu folio: ${resultado.folio}</strong>${emailInfo}`;
-                    document.getElementById('form-cita').reset();
-                } else {
-                    alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-red-900 text-red-200 border border-red-700";
-                    alerta.textContent = resultado.message;
+                            // Opciones del select
+                            select.innerHTML += `<option value="${s.id}">${s.nombre} ($${s.precio} - ${s.duracion_minutos} min)</option>`;
+                        });
+                    } catch (error) {
+                        console.error("Error al cargar servicios:", error);
+                    }
                 }
-            } catch (error) {
-                console.error("Error al enviar cita:", error);
-                alerta.classList.remove('hidden');
-                alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-red-900 text-red-200 border border-red-700";
-                alerta.textContent = "Ocurrió un error de conexión con el servidor.";
-            } finally {
-                setButtonLoading(submitButton,false);
-            }
-        }
 
-        function mostrarAlerta(texto, ok) {
-            const a = document.getElementById('mensaje-alerta'); a.className = `mb-4 p-4 rounded-lg text-sm text-center ${ok ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'}`; a.textContent = texto;
-        }
+                async function cargarBarberosEnLanding() {
+                    const select = document.getElementById('barbero_id');
+                    try {
+                        const r = await fetch('api/barberos.php'); const barberos = await r.json();
+                        select.innerHTML = '<option value="">Selecciona un barbero</option>';
+                        barberos.forEach(b => select.insertAdjacentHTML('beforeend', `<option value="${b.id}">${b.nombre}${b.especialidad ? ' — ' + b.especialidad : ''}</option>`));
+                        if (!barberos.length) select.innerHTML = '<option value="">Aún no hay barberos disponibles</option>';
+                    } catch (e) { select.innerHTML = '<option value="">No se pudieron cargar los barberos</option>'; }
+                }
 
-        function textoNotificacionCorreo(result) {
-            if (result?.sent) return ' También enviamos un correo.';
-            if (result?.reason === 'no_email') return ' La cita no tiene correo asociado.';
-            return ' No se pudo enviar el correo; conserva tu folio.';
-        }
+                async function enviarCita(e) {
+                    e.preventDefault();
+                    const alerta = document.getElementById('mensaje-alerta');
 
-        async function iniciarSesionCliente(e) {
-            e.preventDefault(); const out = document.getElementById('mensaje-login-cliente');
-            const button=e.submitter || document.getElementById('btn-login-cliente');setButtonLoading(button,true,'Iniciando sesión…');
-            try {
-                const r = await fetch('api/auth.php', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_login',email:document.getElementById('login-email-cliente').value,password:document.getElementById('login-password-cliente').value})});
-                const d = await r.json(); if (!d.success) throw new Error(d.message);
-                document.getElementById('nombre').value=d.cliente.nombre; document.getElementById('telefono').value=d.cliente.telefono; document.getElementById('email').value=d.cliente.email;
-                out.textContent='Sesión iniciada. Tus datos se usarán al reservar; guarda siempre el folio para consultar tu cita.';
-                cargarPerfilCliente();
-            } catch(err) { out.textContent=err.message; }
-            finally { setButtonLoading(button,false); }
-        }
+                    const datos = {
+                        nombre: document.getElementById('nombre').value,
+                        telefono: document.getElementById('telefono').value,
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password-cliente').value,
+                        servicio_id: document.getElementById('servicio_id').value,
+                        barbero_id: document.getElementById('barbero_id').value,
+                        fecha: document.getElementById('fecha').value,
+                        hora_inicio: document.getElementById('hora_inicio').value
+                    };
 
-        async function cargarPerfilCliente() {
-            const section=document.getElementById('perfil-cliente'); section.classList.remove('hidden');
-            const box=document.getElementById('citas-perfil');box.innerHTML='<p class="flex items-center gap-2 text-gray-400"><span class="h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-amber-400"></span>Cargando tu perfil y citas…</p>';
-            let d;
-            try { const r=await fetch('api/clientes.php?perfil=1'); d=await r.json(); }
-            catch { box.textContent='No se pudo cargar tu perfil. Intenta actualizar la página.'; return; }
-            if(!d.success){document.getElementById('datos-perfil').textContent=d.message;return;}
-            document.getElementById('datos-perfil').textContent=`${d.cliente.nombre} · ${d.cliente.telefono} · ${d.cliente.email||'Sin correo'}`;
-            if(!d.citas.length){box.innerHTML='<p class="text-gray-400">Aún no tienes citas en tu cuenta. Al reservar con el mismo teléfono aparecerán aquí.</p>';return;}
-            box.innerHTML=d.citas.map(c=>`<article class="rounded-xl border border-gray-700 bg-gray-900 p-4"><div class="flex flex-wrap justify-between gap-2"><div><p class="font-bold text-white">${c.servicio_name} · $${c.precio} MXN</p><p class="text-sm text-gray-300">${c.fecha} · ${c.hora_inicio.slice(0,5)}–${c.hora_fin.slice(0,5)} · ${c.estado}</p><p class="text-sm text-gray-400">Barbero: ${c.barbero_nombre||'Sin asignar'}</p></div><p class="text-amber-400 font-bold">Folio ${c.folio}</p></div>${!['cancelada','completada'].includes(c.estado)?`<form class="form-perfil-cita mt-3 grid grid-cols-2 gap-2" data-folio="${c.folio}"><input type="date" name="fecha" required min="${new Date().toLocaleDateString('en-CA')}" class="bg-gray-700 rounded p-2"><input type="time" name="hora_inicio" required class="bg-gray-700 rounded p-2"><button class="col-span-2 bg-amber-500 text-gray-900 rounded p-2 font-bold">Cambiar horario</button><button type="button" data-cancelar="${c.folio}" class="col-span-2 text-red-300 underline">Cancelar cita</button></form>`:''}</article>`).join('');
-        }
+                    const password = document.getElementById('password-cliente').value;
+                    if (password && password.length < 8) { mostrarAlerta('La contraseña debe tener al menos 8 caracteres.', false); return; }
 
-        async function reprogramarDesdePerfil(e) {
-            if(!e.target.matches('.form-perfil-cita')) return; e.preventDefault(); const f=e.target;
-            const button=e.submitter;setButtonLoading(button,true,'Guardando…');
-            try { const r=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_update',folio:f.dataset.folio,fecha:f.elements.fecha.value,hora_inicio:f.elements.hora_inicio.value})});
-                const d=await r.json(); alert(d.message+textoNotificacionCorreo(d.email_notification)); if(d.success)cargarPerfilCliente(); }
-            catch { alert('No se pudo cambiar el horario. Intenta de nuevo.'); }
-            finally { setButtonLoading(button,false); }
-        }
+                    try {
+                        const res = await fetch('api/citas.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(datos)
+                        });
+                        const resultado = await res.json();
 
-        async function gestionarCitaPerfil(e) {
-            const folio=e.target.dataset.cancelar; if(!folio)return; if(!confirm('¿Cancelar esta cita?'))return;
-            const button=e.target;setButtonLoading(button,true,'Cancelando…');
-            try { const r=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_cancel',folio})}); const d=await r.json(); alert(d.message+textoNotificacionCorreo(d.email_notification)); if(d.success)cargarPerfilCliente(); }
-            catch { alert('No se pudo cancelar la cita. Intenta de nuevo.'); }
-            finally { setButtonLoading(button,false); }
-        }
+                        alerta.classList.remove('hidden');
+                        if (resultado.success) {
+                            alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-green-900 text-green-200 border border-green-700";
+                            const emailInfo = resultado.email_notification?.sent
+                                ? '<br>También enviamos la confirmación a tu correo.'
+                                : datos.email ? '<br>No se pudo enviar el correo; conserva tu folio para consultar la cita.' : '<br>Agrega un correo si quieres recibir avisos.';
+                            alerta.innerHTML = `${resultado.message}<br><strong>Guarda tu folio: ${resultado.folio}</strong>${emailInfo}`;
+                            document.getElementById('form-cita').reset();
+                        } else {
+                            alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-red-900 text-red-200 border border-red-700";
+                            alerta.textContent = resultado.message;
+                        }
+                    } catch (error) {
+                        console.error("Error al enviar cita:", error);
+                        alerta.classList.remove('hidden');
+                        alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-red-900 text-red-200 border border-red-700";
+                        alerta.textContent = "Ocurrió un error de conexión con el servidor.";
+                    }
+                }
 
-        async function cerrarSesionCliente(e) {
-            const button=e.currentTarget;setButtonLoading(button,true,'Cerrando…');
-            try { await fetch('api/auth.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_logout'})});
-                document.getElementById('perfil-cliente').classList.add('hidden'); document.getElementById('mensaje-login-cliente').textContent='Sesión cerrada.'; }
-            finally { setButtonLoading(button,false); }
-        }
+                function mostrarAlerta(texto, ok) {
+                    const a = document.getElementById('mensaje-alerta'); a.className = `mb-4 p-4 rounded-lg text-sm text-center ${ok ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'}`; a.textContent = texto;
+                }
 
-        async function consultarCita(e) {
-            e.preventDefault(); const folio = document.getElementById('folio-consulta').value.trim(); const panel = document.getElementById('resultado-cita');
-            const button=e.submitter || document.getElementById('btn-consultar-cita');setButtonLoading(button,true,'Buscando…');
-            panel.innerHTML='<span class="inline-flex items-center gap-2 text-gray-400"><span class="h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-amber-400"></span>Buscando cita…</span>';
-            try {
-                const r = await fetch(`api/citas.php?folio=${encodeURIComponent(folio)}`); const d = await r.json();
-                if (!d.success) { panel.textContent = d.message; return; }
-                const c = d.cita; panel.innerHTML = `<p><b>Folio:</b> ${c.folio} · <b>Estado:</b> ${c.estado}</p><p>${c.servicio_name} · ${c.fecha} · ${c.hora_inicio.slice(0,5)}–${c.hora_fin.slice(0,5)}</p><p>Barbero: ${c.barbero_nombre||'Sin asignar'}</p>`;
-                if (!['cancelada','completada'].includes(c.estado)) panel.innerHTML += `<form id="form-reprogramar" class="mt-4 grid grid-cols-2 gap-2"><input type="date" id="nueva-fecha" required min="${new Date().toLocaleDateString('en-CA')}" class="bg-gray-700 p-2 rounded"><input type="time" id="nueva-hora" required class="bg-gray-700 p-2 rounded"><button class="col-span-2 bg-amber-500 text-gray-900 font-bold p-2 rounded">Cambiar horario</button></form><button id="cancelar-cita" class="mt-2 text-red-300 underline">Cancelar cita</button>`;
-                const form = document.getElementById('form-reprogramar');
-                if (form) form.addEventListener('submit', async ev => {
-                    ev.preventDefault();const button=ev.submitter;setButtonLoading(button,true,'Guardando…');
-                    try { const response=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_update',folio,fecha:document.getElementById('nueva-fecha').value,hora_inicio:document.getElementById('nueva-hora').value})});const result=await response.json();alert(result.message+textoNotificacionCorreo(result.email_notification));if(result.success)document.getElementById('form-consulta').requestSubmit(); }
-                    catch { alert('No se pudo cambiar el horario. Intenta de nuevo.'); }
-                    finally { setButtonLoading(button,false); }
-                });
-                const cancel = document.getElementById('cancelar-cita');
-                if(cancel) cancel.addEventListener('click', async()=>{
-                    if(!confirm('¿Cancelar esta cita?'))return;setButtonLoading(cancel,true,'Cancelando…');
-                    try { const response=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_cancel',folio})});const result=await response.json();alert(result.message+textoNotificacionCorreo(result.email_notification));if(result.success)document.getElementById('form-consulta').requestSubmit(); }
-                    catch { alert('No se pudo cancelar la cita. Intenta de nuevo.'); }
-                    finally { setButtonLoading(cancel,false); }
-                });
-            } catch { panel.textContent = 'No se pudo consultar la cita.'; }
-            finally { setButtonLoading(button,false); }
-        }
-    </script>
+                function textoNotificacionCorreo(result) {
+                    if (result?.sent) return ' También enviamos un correo.';
+                    if (result?.reason === 'no_email') return ' La cita no tiene correo asociado.';
+                    return ' No se pudo enviar el correo; conserva tu folio.';
+                }
+
+                async function iniciarSesionCliente(e) {
+                    e.preventDefault(); const out = document.getElementById('mensaje-login-cliente');
+                    try {
+                        const r = await fetch('api/auth.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'customer_login', email: document.getElementById('login-email-cliente').value, password: document.getElementById('login-password-cliente').value }) });
+                        const d = await r.json(); if (!d.success) throw new Error(d.message);
+                        document.getElementById('nombre').value = d.cliente.nombre; document.getElementById('telefono').value = d.cliente.telefono; document.getElementById('email').value = d.cliente.email;
+                        out.textContent = 'Sesión iniciada. Tus datos se usarán al reservar; guarda siempre el folio para consultar tu cita.';
+                        cargarPerfilCliente();
+                    } catch (err) { out.textContent = err.message; }
+                }
+
+                async function cargarPerfilCliente() {
+                    const section = document.getElementById('perfil-cliente'); section.classList.remove('hidden');
+                    const r = await fetch('api/clientes.php?perfil=1'); const d = await r.json();
+                    if (!d.success) { document.getElementById('datos-perfil').textContent = d.message; return; }
+                    document.getElementById('datos-perfil').textContent = `${d.cliente.nombre} · ${d.cliente.telefono} · ${d.cliente.email || 'Sin correo'}`;
+                    const box = document.getElementById('citas-perfil');
+                    if (!d.citas.length) { box.innerHTML = '<p class="text-gray-400">Aún no tienes citas en tu cuenta. Al reservar con el mismo teléfono aparecerán aquí.</p>'; return; }
+                    box.innerHTML = d.citas.map(c => `<article class="rounded-xl border border-gray-700 bg-gray-900 p-4"><div class="flex flex-wrap justify-between gap-2"><div><p class="font-bold text-white">${c.servicio_name} · $${c.precio} MXN</p><p class="text-sm text-gray-300">${c.fecha} · ${c.hora_inicio.slice(0, 5)}–${c.hora_fin.slice(0, 5)} · ${c.estado}</p><p class="text-sm text-gray-400">Barbero: ${c.barbero_nombre || 'Sin asignar'}</p></div><p class="text-amber-400 font-bold">Folio ${c.folio}</p></div>${!['cancelada', 'completada'].includes(c.estado) ? `<form class="form-perfil-cita mt-3 grid grid-cols-2 gap-2" data-folio="${c.folio}"><input type="date" name="fecha" required min="${new Date().toLocaleDateString('en-CA')}" class="bg-gray-700 rounded p-2"><input type="time" name="hora_inicio" required class="bg-gray-700 rounded p-2"><button class="col-span-2 bg-amber-500 text-gray-900 rounded p-2 font-bold">Cambiar horario</button><button type="button" data-cancelar="${c.folio}" class="col-span-2 text-red-300 underline">Cancelar cita</button></form>` : ''}</article>`).join('');
+                }
+
+                async function reprogramarDesdePerfil(e) {
+                    if (!e.target.matches('.form-perfil-cita')) return; e.preventDefault(); const f = e.target;
+                    const r = await fetch('api/citas.php', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'customer_update', folio: f.dataset.folio, fecha: f.elements.fecha.value, hora_inicio: f.elements.hora_inicio.value }) });
+                    const d = await r.json(); alert(d.message + textoNotificacionCorreo(d.email_notification)); if (d.success) cargarPerfilCliente();
+                }
+
+                async function gestionarCitaPerfil(e) {
+                    const folio = e.target.dataset.cancelar; if (!folio) return; if (!confirm('¿Cancelar esta cita?')) return;
+                    const r = await fetch('api/citas.php', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'customer_cancel', folio }) }); const d = await r.json(); alert(d.message + textoNotificacionCorreo(d.email_notification)); if (d.success) cargarPerfilCliente();
+                }
+
+                async function cerrarSesionCliente() {
+                    await fetch('api/auth.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'customer_logout' }) });
+                    document.getElementById('perfil-cliente').classList.add('hidden'); document.getElementById('mensaje-login-cliente').textContent = 'Sesión cerrada.';
+                }
+
+                async function consultarCita(e) {
+                    e.preventDefault(); const folio = document.getElementById('folio-consulta').value.trim(); const panel = document.getElementById('resultado-cita');
+                    panel.textContent = 'Buscando…';
+                    try {
+                        const r = await fetch(`api/citas.php?folio=${encodeURIComponent(folio)}`); const d = await r.json();
+                        if (!d.success) { panel.textContent = d.message; return; }
+                        const c = d.cita; panel.innerHTML = `<p><b>Folio:</b> ${c.folio} · <b>Estado:</b> ${c.estado}</p><p>${c.servicio_name} · ${c.fecha} · ${c.hora_inicio.slice(0, 5)}–${c.hora_fin.slice(0, 5)}</p><p>Barbero: ${c.barbero_nombre || 'Sin asignar'}</p>`;
+                        if (!['cancelada', 'completada'].includes(c.estado)) panel.innerHTML += `<form id="form-reprogramar" class="mt-4 grid grid-cols-2 gap-2"><input type="date" id="nueva-fecha" required min="${new Date().toLocaleDateString('en-CA')}" class="bg-gray-700 p-2 rounded"><input type="time" id="nueva-hora" required class="bg-gray-700 p-2 rounded"><button class="col-span-2 bg-amber-500 text-gray-900 font-bold p-2 rounded">Cambiar horario</button></form><button id="cancelar-cita" class="mt-2 text-red-300 underline">Cancelar cita</button>`;
+                        const form = document.getElementById('form-reprogramar'); if (form) form.addEventListener('submit', async ev => { ev.preventDefault(); const response = await fetch('api/citas.php', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'customer_update', folio, fecha: document.getElementById('nueva-fecha').value, hora_inicio: document.getElementById('nueva-hora').value }) }); const result = await response.json(); alert(result.message + textoNotificacionCorreo(result.email_notification)); if (result.success) document.getElementById('form-consulta').requestSubmit(); });
+                        const cancel = document.getElementById('cancelar-cita'); if (cancel) cancel.addEventListener('click', async () => { if (!confirm('¿Cancelar esta cita?')) return; const response = await fetch('api/citas.php', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'customer_cancel', folio }) }); const result = await response.json(); alert(result.message + textoNotificacionCorreo(result.email_notification)); if (result.success) document.getElementById('form-consulta').requestSubmit(); });
+                    } catch { panel.textContent = 'No se pudo consultar la cita.'; }
+                }
+            </script>
 </body>
+
 </html>
