@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Panel — Barbería</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        canvas: '#F6F5F1',
+                        ink: '#141413',
+                        muted: '#6E6D68',
+                        line: '#E4E2DC',
+                        copper: '#B85D3B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F6F5F1;
+            color: #141413;
+        }
+
+        .tabular {
+            font-variant-numeric: tabular-nums;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-toast {
+            animation: fadeUp 0.2s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- PANTALLA DE ACCESO (CENTRADA, ESTILO EDITORIAL) -->
+    <section id="login-panel" class="hidden min-h-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-sm bg-white border border-line p-8">
+            <div class="flex items-center justify-between border-b border-line pb-5 mb-6">
+                <div>
+                    <span class="font-mono text-[11px] uppercase tracking-widest text-muted block">Acceso Privado</span>
+                    <h1 id="login-title" class="text-xl font-bold tracking-tight mt-0.5">Iniciar sesión</h1>
+                </div>
+                <span class="font-mono text-xs border border-line px-2 py-1 text-muted">ADMIN</span>
+            </div>
+
+            <p id="login-help" class="text-xs text-muted mb-5 leading-relaxed"></p>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="email"
+                        class="block font-mono text-[11px] uppercase tracking-wider text-muted mb-1.5">Correo</label>
+                    <input id="email" type="email" required placeholder="admin@barberia.com"
+                        class="w-full bg-canvas border border-line focus:border-ink outline-none px-3 py-2.5 text-sm transition">
+                </div>
+                <div>
+                    <label for="password"
+                        class="block font-mono text-[11px] uppercase tracking-wider text-muted mb-1.5">Contraseña</label>
+                    <input id="password" type="password" required minlength="8" placeholder="••••••••"
+                        class="w-full bg-canvas border border-line focus:border-ink outline-none px-3 py-2.5 text-sm transition">
+                </div>
+                <button id="login-submit"
+                    class="w-full bg-ink hover:bg-neutral-800 text-white py-2.5 text-sm font-semibold tracking-wide transition cursor-pointer mt-2">
+                    Entrar al sistema
+                </button>
+            </form>
+            <p id="auth-message" class="mt-4 text-xs text-red-700 font-medium"></p>
+        </div>
+    </section>
+
+    <!-- WORKSPACE PRINCIPAL -->
+    <div id="dashboard" class="hidden flex-1 flex flex-col md:flex-row">
+
+        <!-- SIDEBAR IZQUIERDO -->
+        <aside
+            class="w-full md:w-60 bg-white border-b md:border-b-0 md:border-r border-line flex flex-col justify-between shrink-0">
+            <div>
+                <!-- Marca -->
+                <div class="h-16 px-6 border-b border-line flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-2.5 h-2.5 bg-copper inline-block"></span>
+                        <span class="font-bold tracking-tight text-base">BARBERÍA</span>
+                    </div>
+                    <span class="font-mono text-[10px] text-muted border border-line px-1.5 py-0.5">V1.0</span>
+                </div>
+
+                <!-- Navegación -->
+                <nav class="p-3 flex md:flex-col gap-1 overflow-x-auto" role="tablist">
+                    <button
+                        class="tab active-tab flex items-center justify-between px-3.5 py-2.5 text-sm font-semibold bg-canvas text-ink border border-line transition text-left w-full"
+                        data-tab="citas">
+                        <span>Agenda de citas</span>
+                        <span id="badge-pendientes"
+                            class="font-mono text-[11px] bg-copper text-white px-1.5 py-0.2">0</span>
+                    </button>
+                    <button
+                        class="tab flex items-center justify-between px-3.5 py-2.5 text-sm font-medium text-muted hover:text-ink border border-transparent transition text-left w-full"
+                        data-tab="servicios">
+                        <span>Catálogo de servicios</span>
+                        <span id="badge-servicios" class="font-mono text-[11px] text-muted">0</span>
+                    </button>
+                    <button
+                        class="tab flex items-center justify-between px-3.5 py-2.5 text-sm font-medium text-muted hover:text-ink border border-transparent transition text-left w-full"
+                        data-tab="barberos">
+                        <span>Equipo de barberos</span>
+                        <span id="badge-barberos" class="font-mono text-[11px] text-muted">0</span>
+                    </button>
+                    <button
+                        class="tab flex items-center justify-between px-3.5 py-2.5 text-sm font-medium text-muted hover:text-ink border border-transparent transition text-left w-full"
+                        data-tab="clientes">
+                        <span>Base de clientes</span>
+                        <span id="badge-clientes" class="font-mono text-[11px] text-muted">0</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Footer Sidebar -->
+            <div class="hidden md:block p-4 border-t border-line space-y-2">
+                <a href="index.html" target="_blank"
+                    class="flex items-center justify-between w-full px-3 py-2 text-xs font-medium text-muted hover:text-ink border border-line hover:bg-canvas transition">
+                    <span>Ver sitio público</span>
+                    <span>↗</span>
+                </a>
+                <button id="logout"
+                    class="w-full px-3 py-2 text-xs font-medium text-left text-muted hover:text-red-700 transition">
+                    Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- ÁREA DE CONTENIDO -->
+        <div class="flex-1 flex flex-col min-w-0">
+
+            <!-- TOPBAR -->
+            <header class="h-16 bg-white border-b border-line px-6 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-6 overflow-x-auto">
+                    <div>
+                        <span class="font-mono text-[10px] uppercase text-muted block">Total Citas</span>
+                        <span id="kpi-total-citas" class="font-mono font-semibold text-sm tabular">0</span>
+                    </div>
+                    <div class="h-6 w-px bg-line"></div>
+                    <div>
+                        <span class="font-mono text-[10px] uppercase text-muted block">Completadas</span>
+                        <span id="kpi-completadas"
+                            class="font-mono font-semibold text-sm tabular text-emerald-700">0</span>
+                    </div>
+                    <div class="h-6 w-px bg-line"></div>
+                    <div>
+                        <span class="font-mono text-[10px] uppercase text-muted block">Clientes</span>
+                        <span id="kpi-clientes" class="font-mono font-semibold text-sm tabular">0</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="relative hidden sm:block">
+                        <input id="quick-search" type="text" placeholder="Filtrar registro..."
+                            class="bg-canvas border border-line focus:border-ink outline-none px-3 py-1.5 text-xs w-56 transition">
+                    </div>
+                    <button id="logout-mobile" onclick="$('logout').click()"
+                        class="md:hidden text-xs font-medium text-muted underline">
+                        Salir
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENEDOR DE VISTAS -->
+            <main class="flex-1 p-6 max-w-6xl w-full">
+
+                <!-- VISTA 1: CITAS -->
+                <section id="tab-citas" class="space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-bold tracking-tight">Agenda y Reservaciones</h2>
+                            <p class="text-xs text-muted">Gestiona el flujo diario de atención en silla.</p>
+                        </div>
+
+                        <!-- Filtros rápidos por estado -->
+                        <div class="flex items-center gap-1 bg-white border border-line p-1 text-xs">
+                            <button onclick="filterCitasByStatus('todas', this)"
+                                class="status-filter px-2.5 py-1 bg-ink text-white font-medium">Todas</button>
+                            <button onclick="filterCitasByStatus('pendiente', this)"
+                                class="status-filter px-2.5 py-1 text-muted hover:text-ink">Pendientes</button>
+                            <button onclick="filterCitasByStatus('confirmada', this)"
+                                class="status-filter px-2.5 py-1 text-muted hover:text-ink">Confirmadas</button>
+                            <button onclick="filterCitasByStatus('completada', this)"
+                                class="status-filter px-2.5 py-1 text-muted hover:text-ink">Completadas</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-line overflow-x-auto">
+                        <table class="min-w-full text-sm border-collapse">
+                            <thead>
+                                <tr
+                                    class="border-b border-line bg-canvas/60 text-left font-mono text-[11px] uppercase text-muted">
+                                    <th class="py-3 px-4 font-medium">Horario</th>
+                                    <th class="py-3 px-4 font-medium">Cliente</th>
+                                    <th class="py-3 px-4 font-medium">Servicio</th>
+                                    <th class="py-3 px-4 font-medium">Barbero</th>
+                                    <th class="py-3 px-4 font-medium">Folio</th>
+                                    <th class="py-3 px-4 font-medium">Estado</th>
+                                    <th class="py-3 px-4 font-medium text-right">Acción rápida</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-citas" class="divide-y divide-line"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- VISTA: BARBEROS -->
+                <section id="tab-barberos" class="hidden space-y-5">
+                    <div class="flex items-center justify-between">
+                        <div><h2 class="text-lg font-bold tracking-tight">Equipo de barberos</h2><p class="text-xs text-muted">Administra quién puede recibir reservaciones.</p></div>
+                        <button onclick="toggleBarberDrawer(true)" class="bg-ink text-white text-xs font-semibold px-4 py-2.5">+ Nuevo barbero</button>
+                    </div>
+                    <div id="barber-drawer" class="hidden bg-white border border-ink p-5">
+                        <div class="flex justify-between border-b border-line pb-3 mb-4"><h3 id="barber-form-title" class="font-bold text-sm">Registrar barbero</h3><button type="button" onclick="resetBarberForm()" class="text-xs text-muted">Cerrar</button></div>
+                        <form id="barber-form" class="grid sm:grid-cols-3 gap-4 items-end">
+                            <input id="barber-id" type="hidden">
+                            <div><label class="block font-mono text-[10px] uppercase text-muted mb-1">Nombre *</label><input id="barber-name" required class="w-full bg-canvas border border-line px-3 py-2 text-sm"></div>
+                            <div><label class="block font-mono text-[10px] uppercase text-muted mb-1">Especialidad</label><input id="barber-specialty" placeholder="Fade, barba…" class="w-full bg-canvas border border-line px-3 py-2 text-sm"></div>
+                            <button id="barber-submit-btn" class="bg-copper text-white text-xs font-semibold px-3 py-2.5">Guardar barbero</button>
+                        </form>
+                    </div>
+                    <div class="bg-white border border-line overflow-x-auto"><table class="min-w-full text-sm"><thead><tr class="border-b bg-canvas/60 text-left font-mono text-[11px] uppercase text-muted"><th class="py-3 px-4">Nombre</th><th class="py-3 px-4">Especialidad</th><th class="py-3 px-4">Estado</th><th class="py-3 px-4 text-right">Gestión</th></tr></thead><tbody id="tabla-barberos" class="divide-y divide-line"></tbody></table></div>
+                </section>
+
+                <!-- VISTA 2: SERVICIOS -->
+                <section id="tab-servicios" class="hidden space-y-5">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold tracking-tight">Catálogo de Servicios</h2>
+                            <p class="text-xs text-muted">Tarifas y tiempos de duración en agenda.</p>
+                        </div>
+                        <button onclick="toggleServiceDrawer(true)"
+                            class="bg-ink hover:bg-neutral-800 text-white text-xs font-semibold px-4 py-2.5 transition">
+                            + Nuevo servicio
+                        </button>
+                    </div>
+
+                    <!-- Panel desplegable para crear/editar -->
+                    <div id="service-drawer" class="hidden bg-white border border-ink p-5">
+                        <div class="flex items-center justify-between border-b border-line pb-3 mb-4">
+                            <h3 id="service-form-title" class="font-bold text-sm">Registrar nuevo servicio</h3>
+                            <button type="button" onclick="resetServiceForm()"
+                                class="font-mono text-xs text-muted hover:text-ink">Cerrar [ESC]</button>
+                        </div>
+                        <form id="service-form" class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+                            <input id="service-id" type="hidden">
+                            <div class="sm:col-span-3">
+                                <label class="block font-mono text-[10px] uppercase text-muted mb-1">Nombre *</label>
+                                <input id="service-name" required placeholder="Corte + Barba"
+                                    class="w-full bg-canvas border border-line focus:border-ink outline-none px-3 py-2 text-sm">
+                            </div>
+                            <div class="sm:col-span-4">
+                                <label class="block font-mono text-[10px] uppercase text-muted mb-1">Descripción</label>
+                                <input id="service-description" placeholder="Toalla caliente y perfilado"
+                                    class="w-full bg-canvas border border-line focus:border-ink outline-none px-3 py-2 text-sm">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block font-mono text-[10px] uppercase text-muted mb-1">Precio (MXN)
+                                    *</label>
+                                <input id="service-price" type="number" min="0" step="0.01" required
+                                    placeholder="250.00"
+                                    class="w-full bg-canvas border border-line focus:border-ink outline-none px-3 py-2 text-sm font-mono">
+                            </div>
+                            <div class="sm:col-span-1">
+                                <label class="block font-mono text-[10px] uppercase text-muted mb-1">Minutos *</label>
+                                <input id="service-duration" type="number" min="1" required placeholder="45"
+                                    class="w-full bg-canvas border border-line focus:border-ink outline-none px-3 py-2 text-sm font-mono">
+                            </div>
+                            <div class="sm:col-span-2 flex gap-2">
+                                <button id="service-submit-btn"
+                                    class="w-full bg-copper hover:opacity-90 text-white text-xs font-semibold py-2.5 px-3 transition">
+                                    Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white border border-line overflow-x-auto">
+                        <table class="min-w-full text-sm border-collapse">
+                            <thead>
+                                <tr
+                                    class="border-b border-line bg-canvas/60 text-left font-mono text-[11px] uppercase text-muted">
+                                    <th class="py-3 px-4 font-medium">Servicio</th>
+                                    <th class="py-3 px-4 font-medium">Descripción</th>
+                                    <th class="py-3 px-4 font-medium">Duración</th>
+                                    <th class="py-3 px-4 font-medium">Tarifa</th>
+                                    <th class="py-3 px-4 font-medium text-right">Gestión</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-servicios" class="divide-y divide-line"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- VISTA 3: CLIENTES -->
+                <section id="tab-clientes" class="hidden space-y-4">
+                    <div>
+                        <h2 class="text-lg font-bold tracking-tight">Base de Clientes</h2>
+                        <p class="text-xs text-muted">Historial acumulado de visitas por cliente.</p>
+                    </div>
+
+                    <div class="bg-white border border-line overflow-x-auto">
+                        <table class="min-w-full text-sm border-collapse">
+                            <thead>
+                                <tr
+                                    class="border-b border-line bg-canvas/60 text-left font-mono text-[11px] uppercase text-muted">
+                                    <th class="py-3 px-4 font-medium">Nombre</th>
+                                    <th class="py-3 px-4 font-medium">Teléfono</th>
+                                    <th class="py-3 px-4 font-medium">Correo</th>
+                                    <th class="py-3 px-4 font-medium">Visitas</th>
+                                    <th class="py-3 px-4 font-medium text-right">Última cita</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-clientes" class="divide-y divide-line"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        const $ = id => document.getElementById(id);
+        let firstSetup = false, servicesCache = [], citasCache = [], clientesCache = [], currentStatusFilter = 'todas';
+
+        function notify(msg, type = 'success') {
+            const el = document.createElement('div');
+            el.className = `animate-toast px-4 py-3 text-xs font-medium border flex items-center gap-3 shadow-sm ${type === 'error' ? 'bg-red-950 text-white border-red-800' : 'bg-ink text-white border-neutral-700'
+                }`;
+            el.innerHTML = `<span class="w-1.5 h-1.5 ${type === 'error' ? 'bg-red-400' : 'bg-copper'}"></span><span>${msg}</span>`;
+            $('toast-container').appendChild(el);
+            setTimeout(() => el.remove(), 3200);
+        }
+
+        function getStatusIndicator(estado) {
+            const map = {
+                pendiente: { dot: 'bg-amber-500', text: 'text-amber-800 bg-amber-50 border-amber-200' },
+                confirmada: { dot: 'bg-sky-600', text: 'text-sky-800 bg-sky-50 border-sky-200' },
+                completada: { dot: 'bg-emerald-600', text: 'text-emerald-800 bg-emerald-50 border-emerald-200' },
+                cancelada: { dot: 'bg-neutral-400', text: 'text-neutral-600 bg-neutral-100 border-neutral-200' }
+            };
+            const s = map[estado] || map.cancelada;
+            return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium border ${s.text}">
+                <span class="w-1.5 h-1.5 rounded-full ${s.dot}"></span>
+                <span class="capitalize">${estado}</span>
+            </span>`;
+        }
+
+        async function api(url, options = {}) {
+            const r = await fetch(url, options);
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.message || 'Ocurrió un error.');
+            return d;
+        }
+
+        function body(data) {
+            return { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) };
+        }
+
+        async function init() {
+            try {
+                const s = await api('api/auth.php?action=status');
+                firstSetup = s.setup;
+                if (s.authenticated) {
+                    showDashboard();
+                } else {
+                    $('login-panel').classList.remove('hidden');
+                    $('login-title').textContent = firstSetup ? 'Configurar administrador' : 'Iniciar sesión';
+                    $('login-help').textContent = firstSetup
+                        ? 'Crea las credenciales maestras para administrar la barbería.'
+                        : 'Introduce tus credenciales para acceder a la agenda y servicios.';
+                    $('login-submit').textContent = firstSetup ? 'Crear administrador' : 'Entrar al sistema';
+                }
+            } catch (e) {
+                $('login-panel').classList.remove('hidden');
+                $('auth-message').textContent = e.message;
+            }
+        }
+
+        function showDashboard() {
+            $('login-panel').classList.add('hidden');
+            $('dashboard').classList.remove('hidden');
+            loadCitas();
+            loadServicios();
+            loadBarberos();
+            loadClientes();
+        }
+
+        $('login-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            try {
+                const d = await api('api/auth.php', body({
+                    action: firstSetup ? 'setup' : 'login',
+                    email: $('email').value,
+                    password: $('password').value
+                }));
+                if (!d.success) throw Error(d.message);
+                showDashboard();
+            } catch (err) {
+                $('auth-message').textContent = err.message;
+            }
+        });
+
+        $('logout').addEventListener('click', async () => {
+            await api('api/auth.php', body({ action: 'logout' }));
+            location.reload();
+        });
+
+        // Navegación Sidebar
+        document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('bg-canvas', 'text-ink', 'border-line', 'font-semibold');
+                t.classList.add('text-muted', 'border-transparent', 'font-medium');
+            });
+            b.classList.add('bg-canvas', 'text-ink', 'border-line', 'font-semibold');
+            b.classList.remove('text-muted', 'border-transparent', 'font-medium');
+
+            document.querySelectorAll('[id^="tab-"]').forEach(x => x.classList.add('hidden'));
+            $('tab-' + b.dataset.tab).classList.remove('hidden');
+        }));
+
+        // Búsqueda global
+        $('quick-search').addEventListener('input', e => {
+            const q = e.target.value.toLowerCase();
+            applyCitasFilter(q);
+            renderClientes(clientesCache.filter(c => c.nombre.toLowerCase().includes(q) || c.telefono.includes(q)));
+        });
+
+        // CITAS
+        async function loadCitas() {
+            try {
+                citasCache = await api('api/citas.php');
+                const pendientes = citasCache.filter(c => c.estado === 'pendiente').length;
+                const completadas = citasCache.filter(c => c.estado === 'completada').length;
+
+                $('kpi-total-citas').textContent = citasCache.length;
+                $('kpi-completadas').textContent = completadas;
+                $('badge-pendientes').textContent = pendientes;
+
+                applyCitasFilter($('quick-search').value.toLowerCase());
+            } catch (e) {
+                $('tabla-citas').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-700 text-xs">${e.message}</td></tr>`;
+            }
+        }
+
+        function filterCitasByStatus(status, btn) {
+            currentStatusFilter = status;
+            document.querySelectorAll('.status-filter').forEach(b => {
+                b.classList.remove('bg-ink', 'text-white', 'font-medium');
+                b.classList.add('text-muted');
+            });
+            btn.classList.add('bg-ink', 'text-white', 'font-medium');
+            btn.classList.remove('text-muted');
+            applyCitasFilter($('quick-search').value.toLowerCase());
+        }
+
+        function applyCitasFilter(query = '') {
+            const filtered = citasCache.filter(c => {
+                const matchStatus = currentStatusFilter === 'todas' || c.estado === currentStatusFilter;
+                const matchQuery = !query ||
+                    c.cliente_nombre.toLowerCase().includes(query) ||
+                    c.folio.toLowerCase().includes(query) ||
+                    c.servicio_name.toLowerCase().includes(query) ||
+                    (c.barbero_nombre || '').toLowerCase().includes(query);
+                return matchStatus && matchQuery;
+            });
+            renderCitas(filtered);
+        }
+
+        function renderCitas(rows) {
+            $('tabla-citas').innerHTML = rows.length ? rows.map(c => `
+                <tr class="hover:bg-canvas/50 transition">
+                    <td class="py-3.5 px-4 whitespace-nowrap tabular">
+                        <div class="font-semibold text-ink">${c.fecha}</div>
+                        <div class="font-mono text-xs text-muted">${c.hora_inicio.slice(0, 5)} – ${c.hora_fin.slice(0, 5)}</div>
+                    </td>
+                    <td class="py-3.5 px-4">
+                        <div class="font-medium text-ink">${c.cliente_nombre}</div>
+                        <a href="tel:${c.telefono}" class="font-mono text-xs text-muted hover:text-copper">${c.telefono}</a>
+                    </td>
+                    <td class="py-3.5 px-4 text-ink">${c.servicio_name}</td>
+                    <td class="py-3.5 px-4 text-ink">${c.barbero_nombre || 'Sin asignar'}</td>
+                    <td class="py-3.5 px-4 font-mono text-xs text-muted">#${c.folio}</td>
+                    <td class="py-3.5 px-4">${getStatusIndicator(c.estado)}</td>
+                    <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                        <div class="inline-flex items-center gap-1.5">
+                            ${c.estado === 'pendiente' ? `<button onclick="setStatus(${c.id}, 'confirmada')" class="px-2.5 py-1 text-xs font-medium bg-ink text-white hover:bg-neutral-800 transition">Confirmar</button>` : ''}
+                            ${c.estado === 'confirmada' ? `<button onclick="setStatus(${c.id}, 'completada')" class="px-2.5 py-1 text-xs font-medium bg-emerald-700 text-white hover:bg-emerald-800 transition">Completar</button>` : ''}
+                            <select onchange="setStatus(${c.id}, this.value)" aria-label="Cambiar estado"
+                                class="border border-line bg-canvas px-2 py-1 text-xs text-muted focus:border-ink outline-none cursor-pointer">
+                                <option value="" disabled selected>Más...</option>
+                                ${['pendiente', 'confirmada', 'completada', 'cancelada']
+                    .filter(x => x !== c.estado)
+                    .map(x => `<option value="${x}">${x.charAt(0).toUpperCase() + x.slice(1)}</option>`)
+                    .join('')}
+                            </select>
+                        </div>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="7" class="p-10 text-center text-xs text-muted font-mono">SIN REGISTROS EN ESTA VISTA</td></tr>';
+        }
+
+        async function setStatus(id, estado) {
+            if (!estado) return;
+            try {
+                await api('api/citas.php', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, estado })
+                });
+                notify(`Estado actualizado: ${estado}`);
+                loadCitas();
+            } catch (e) {
+                notify(e.message, 'error');
+            }
+        }
+
+        // SERVICIOS
+        function toggleServiceDrawer(open) {
+            $('service-drawer').classList.toggle('hidden', !open);
+            if (open) $('service-name').focus();
+        }
+
+        async function loadServicios() {
+            try {
+                servicesCache = await api('api/servicios.php');
+                $('badge-servicios').textContent = servicesCache.length;
+                $('tabla-servicios').innerHTML = servicesCache.length ? servicesCache.map(s => `
+                    <tr class="hover:bg-canvas/50 transition">
+                        <td class="py-3.5 px-4 font-semibold text-ink">${s.nombre}</td>
+                        <td class="py-3.5 px-4 text-muted text-xs max-w-md">${s.descripcion || '—'}</td>
+                        <td class="py-3.5 px-4 font-mono text-xs text-muted tabular">${s.duracion_minutos} min</td>
+                        <td class="py-3.5 px-4 font-mono font-semibold text-sm tabular">$${parseFloat(s.precio).toFixed(2)}</td>
+                        <td class="py-3.5 px-4 text-right whitespace-nowrap space-x-3">
+                            <button onclick="editService(${s.id})" class="text-xs font-medium text-ink hover:text-copper underline">Editar</button>
+                            <button onclick="deleteService(${s.id})" class="text-xs font-medium text-muted hover:text-red-700">Desactivar</button>
+                        </td>
+                    </tr>
+                `).join('') : '<tr><td colspan="5" class="p-10 text-center text-xs text-muted font-mono">NO HAY SERVICIOS ACTIVOS</td></tr>';
+            } catch (e) {
+                $('tabla-servicios').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-700 text-xs">${e.message}</td></tr>`;
+            }
+        }
+
+        function editService(id) {
+            const s = servicesCache.find(x => +x.id === id);
+            $('service-id').value = s.id;
+            $('service-name').value = s.nombre;
+            $('service-description').value = s.descripcion || '';
+            $('service-price').value = s.precio;
+            $('service-duration').value = s.duracion_minutos;
+
+            $('service-form-title').textContent = `Editando servicio — ${s.nombre}`;
+            $('service-submit-btn').textContent = 'Actualizar';
+            toggleServiceDrawer(true);
+        }
+
+        function resetServiceForm() {
+            $('service-form').reset();
+            $('service-id').value = '';
+            $('service-form-title').textContent = 'Registrar nuevo servicio';
+            $('service-submit-btn').textContent = 'Guardar';
+            toggleServiceDrawer(false);
+        }
+
+        $('service-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const id = $('service-id').value;
+            const data = {
+                id,
+                nombre: $('service-name').value,
+                descripcion: $('service-description').value,
+                precio: $('service-price').value,
+                duracion_minutos: $('service-duration').value
+            };
+            try {
+                await api('api/servicios.php', {
+                    method: id ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                notify(id ? 'Servicio actualizado' : 'Servicio agregado al catálogo');
+                resetServiceForm();
+                loadServicios();
+            } catch (err) {
+                notify(err.message, 'error');
+            }
+        });
+
+        async function deleteService(id) {
+            if (!confirm('¿Desactivar este servicio del catálogo?')) return;
+            try {
+                await api('api/servicios.php', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                notify('Servicio desactivado');
+                loadServicios();
+            } catch (e) {
+                notify(e.message, 'error');
+            }
+        }
+
+        // BARBEROS
+        async function loadBarberos() {
+            try {
+                barberosCache = await api('api/barberos.php?admin=1');
+                $('badge-barberos').textContent = barberosCache.filter(b => +b.activo === 1).length;
+                $('tabla-barberos').innerHTML = barberosCache.length ? barberosCache.map(b => `
+                    <tr class="hover:bg-canvas/50 transition">
+                        <td class="py-3.5 px-4 font-semibold">${b.nombre}</td><td class="py-3.5 px-4 text-muted">${b.especialidad || '—'}</td>
+                        <td class="py-3.5 px-4">${+b.activo === 1 ? 'Activo' : 'Inactivo'}</td>
+                        <td class="py-3.5 px-4 text-right whitespace-nowrap"><button onclick="editBarber(${b.id})" class="text-xs underline mr-3">Editar</button><button onclick="setBarberActive(${b.id},${+b.activo===1?0:1})" class="text-xs ${+b.activo===1?'text-red-700':'text-emerald-700'}">${+b.activo===1?'Desactivar':'Reactivar'}</button></td>
+                    </tr>`).join('') : '<tr><td colspan="4" class="p-8 text-center text-xs text-muted">Aún no hay barberos registrados.</td></tr>';
+            } catch(e) { $('tabla-barberos').innerHTML = `<tr><td colspan="4" class="p-6 text-red-700 text-xs">${e.message}</td></tr>`; }
+        }
+        let barberosCache = [];
+        function toggleBarberDrawer(open) { $('barber-drawer').classList.toggle('hidden', !open); if(open)$('barber-name').focus(); }
+        function editBarber(id) {
+            const b=barberosCache.find(x=>+x.id===id); if(!b)return;
+            $('barber-id').value=b.id; $('barber-name').value=b.nombre; $('barber-specialty').value=b.especialidad||'';
+            $('barber-form-title').textContent=`Editar barbero — ${b.nombre}`; $('barber-submit-btn').textContent='Actualizar'; toggleBarberDrawer(true);
+        }
+        function resetBarberForm() { $('barber-form').reset(); $('barber-id').value=''; $('barber-form-title').textContent='Registrar barbero'; $('barber-submit-btn').textContent='Guardar barbero'; toggleBarberDrawer(false); }
+        $('barber-form').addEventListener('submit',async e=>{
+            e.preventDefault();const id=$('barber-id').value;
+            try { await api('api/barberos.php',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,nombre:$('barber-name').value,especialidad:$('barber-specialty').value})});notify(id?'Barbero actualizado':'Barbero agregado');resetBarberForm();loadBarberos(); }
+            catch(err){notify(err.message,'error');}
+        });
+        async function deactivateBarber(id) {
+            if(!confirm('¿Desactivar este barbero? No aparecerá en nuevas reservaciones.'))return;
+            try{await api('api/barberos.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});notify('Barbero desactivado');loadBarberos();}
+            catch(e){notify(e.message,'error');}
+        }
+        async function setBarberActive(id,activo) {
+            const b=barberosCache.find(x=>+x.id===id);if(!b)return;
+            const question=activo?'¿Reactivar a '+b.nombre+' para nuevas reservaciones?':'¿Desactivar a '+b.nombre+'?';if(!confirm(question))return;
+            try{await api('api/barberos.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,activo})});notify(activo?'Barbero reactivado':'Barbero desactivado');loadBarberos();}
+            catch(e){notify(e.message,'error');}
+        }
+
+        // CLIENTES
+        async function loadClientes() {
+            try {
+                clientesCache = await api('api/clientes.php');
+                $('kpi-clientes').textContent = clientesCache.length;
+                $('badge-clientes').textContent = clientesCache.length;
+                renderClientes(clientesCache);
+            } catch (e) {
+                $('tabla-clientes').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-700 text-xs">${e.message}</td></tr>`;
+            }
+        }
+
+        function renderClientes(rows) {
+            $('tabla-clientes').innerHTML = rows.length ? rows.map(c => `
+                <tr class="hover:bg-canvas/50 transition">
+                    <td class="py-3.5 px-4 font-medium text-ink">${c.nombre}</td>
+                    <td class="py-3.5 px-4 font-mono text-xs text-muted">${c.telefono}</td>
+                    <td class="py-3.5 px-4 text-xs text-muted">${c.email || '—'}</td>
+                    <td class="py-3.5 px-4 font-mono text-xs tabular">${c.total_citas}</td>
+                    <td class="py-3.5 px-4 text-right font-mono text-xs text-muted tabular">${c.ultima_cita || '—'}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="p-10 text-center text-xs text-muted font-mono">SIN CLIENTES REGISTRADOS</td></tr>';
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && !$('service-drawer').classList.contains('hidden')) {
+                resetServiceForm();
+            }
+        });
+
+        init();
+    </script>
+</body>
+
+</html>

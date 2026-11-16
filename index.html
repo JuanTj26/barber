@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbería El Estilo - Reserva tu Cita</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans antialiased">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-wider text-amber-500">BARBERÍA EL ESTILO 💈</h1>
+            <a href="admin.html" class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg transition">Acceso Admin ⚙️</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-16 text-center bg-gradient-to-b from-gray-800 to-gray-900 px-4">
+        <h2 class="text-4xl font-extrabold mb-4">Cortes y Estilo Profesional</h2>
+        <p class="text-gray-400 max-w-xl mx-auto mb-8">Agenda tu cita en segundos. Sin filas, con la mejor atención y productos especializados para tu barba y cabello.</p>
+        <a href="#reservar" class="bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-6 py-3 rounded-xl shadow-lg transition">Reservar Ahora</a>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-12 space-y-16">
+        
+        <!-- Catálogo de Servicios -->
+        <section>
+            <h3 class="text-2xl font-bold text-center mb-8 text-amber-400">Nuestros Servicios</h3>
+            <div id="grid-servicios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Cargado dinámicamente por JS -->
+            </div>
+        </section>
+
+        <!-- Formulario de Reserva -->
+        <section id="reservar" class="max-w-xl mx-auto bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-700">
+            <h3 class="text-2xl font-bold mb-6 text-center text-amber-400">Aparta tu Cita</h3>
+            
+            <div id="mensaje-alerta" class="hidden mb-4 p-4 rounded-lg text-sm text-center"></div>
+
+            <form id="form-cita" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Nombre Completo</label>
+                    <input type="text" id="nombre" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Teléfono (10 Dígitos)</label>
+                        <input type="number" id="telefono" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Correo (Opcional)</label>
+                        <input type="email" id="email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
+                    </div>
+                <details class="rounded-lg bg-gray-700 p-4">
+                    <summary class="cursor-pointer font-medium">Crear cuenta de cliente (opcional)</summary>
+                    <p class="mt-2 text-sm text-gray-300">Puedes reservar como invitado. Para registrarte, agrega una contraseña.</p>
+                    <input type="password" id="password-cliente" minlength="8" placeholder="Contraseña (mínimo 8 caracteres)" class="mt-3 w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2">
+                </details>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Selecciona el Servicio</label>
+                    <select id="servicio_id" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
+                        <option value="">Cargando servicios...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Barbero de tu preferencia</label>
+                    <select id="barbero_id" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
+                        <option value="">Cargando barberos...</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Fecha</label>
+                        <input type="date" id="fecha" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Hora de Inicio</label>
+                        <input type="time" id="hora_inicio" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-3 rounded-xl transition mt-4">Confirmar Cita</button>
+            </form>
+        </section>
+
+        <section class="max-w-xl mx-auto bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-700">
+            <h3 class="text-2xl font-bold mb-4 text-center text-amber-400">Consultar o modificar una cita</h3>
+            <form id="form-consulta" class="flex gap-2"><input id="folio-consulta" required placeholder="Folio de tu cita" class="min-w-0 flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2"><button class="bg-amber-500 text-gray-900 font-bold px-4 rounded-lg">Consultar</button></form>
+            <div id="resultado-cita" class="mt-4 text-sm"></div>
+        </section>
+
+        <section class="max-w-xl mx-auto bg-gray-800 p-6 rounded-2xl border border-gray-700">
+            <details><summary class="cursor-pointer text-amber-400 font-semibold">¿Ya tienes cuenta de cliente? Inicia sesión</summary>
+                <form id="form-login-cliente" class="grid gap-3 mt-4"><input id="login-email-cliente" type="email" required placeholder="Correo" class="bg-gray-700 rounded-lg px-4 py-2"><input id="login-password-cliente" type="password" required placeholder="Contraseña" class="bg-gray-700 rounded-lg px-4 py-2"><button class="bg-gray-600 rounded-lg py-2">Usar mis datos guardados</button></form><p id="mensaje-login-cliente" class="mt-2 text-sm"></p>
+            </details>
+        </section>
+
+        <section id="perfil-cliente" class="hidden max-w-3xl mx-auto bg-gray-800 p-6 rounded-2xl border border-gray-700">
+            <div class="flex justify-between items-center gap-3 mb-4"><h3 class="text-2xl font-bold text-amber-400">Mi perfil y mis citas</h3><button id="cerrar-sesion-cliente" class="text-sm underline text-gray-300">Cerrar sesión</button></div>
+            <div id="datos-perfil" class="text-sm text-gray-300 mb-5"></div><div id="citas-perfil" class="space-y-3"></div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-center py-6 text-gray-500 text-sm border-t border-gray-700 mt-16">
+        <p>&copy; 2026 Barbería El Estilo. Proyecto Escolar.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarServiciosEnLanding();
+            cargarBarberosEnLanding();
+
+            // Asignar fecha mínima de hoy en el input date
+            const now = new Date();
+            const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            document.getElementById('fecha').min = today;
+
+            document.getElementById('form-cita').addEventListener('submit', enviarCita);
+            document.getElementById('form-consulta').addEventListener('submit', consultarCita);
+            document.getElementById('form-login-cliente').addEventListener('submit', iniciarSesionCliente);
+            document.getElementById('cerrar-sesion-cliente').addEventListener('click', cerrarSesionCliente);
+            document.getElementById('citas-perfil').addEventListener('click', gestionarCitaPerfil);
+            document.getElementById('citas-perfil').addEventListener('submit', reprogramarDesdePerfil);
+            fetch('api/auth.php?action=status').then(r=>r.json()).then(s=>{if(s.cliente) cargarPerfilCliente();}).catch(()=>{});
+        });
+
+        async function cargarServiciosEnLanding() {
+            try {
+                const res = await fetch('api/servicios.php');
+                const servicios = await res.json();
+                
+                const grid = document.getElementById('grid-servicios');
+                const select = document.getElementById('servicio_id');
+                
+                grid.innerHTML = '';
+                select.innerHTML = '<option value="">Selecciona un servicio</option>';
+
+                servicios.forEach(s => {
+                    // Tarjeta visual
+                    grid.innerHTML += `
+                        <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 flex flex-col justify-between shadow-md">
+                            <div>
+                                <h4 class="text-lg font-bold text-amber-400 mb-2">${s.nombre}</h4>
+                                <p class="text-gray-400 text-sm mb-4">${s.descripcion}</p>
+                            </div>
+                            <div class="flex justify-between items-center border-t border-gray-700 pt-4 mt-2">
+                                <span class="text-xl font-bold text-white">$${s.precio} MXN</span>
+                                <span class="text-xs bg-gray-700 px-2.5 py-1 rounded-full text-gray-300">${s.duracion_minutos} min</span>
+                            </div>
+                        </div>
+                    `;
+
+                    // Opciones del select
+                    select.innerHTML += `<option value="${s.id}">${s.nombre} ($${s.precio} - ${s.duracion_minutos} min)</option>`;
+                });
+            } catch (error) {
+                console.error("Error al cargar servicios:", error);
+            }
+        }
+
+        async function cargarBarberosEnLanding() {
+            const select=document.getElementById('barbero_id');
+            try {
+                const r=await fetch('api/barberos.php'); const barberos=await r.json();
+                select.innerHTML='<option value="">Selecciona un barbero</option>';
+                barberos.forEach(b=>select.insertAdjacentHTML('beforeend',`<option value="${b.id}">${b.nombre}${b.especialidad?' — '+b.especialidad:''}</option>`));
+                if(!barberos.length) select.innerHTML='<option value="">Aún no hay barberos disponibles</option>';
+            } catch(e) { select.innerHTML='<option value="">No se pudieron cargar los barberos</option>'; }
+        }
+
+        async function enviarCita(e) {
+            e.preventDefault();
+            const alerta = document.getElementById('mensaje-alerta');
+
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                telefono: document.getElementById('telefono').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password-cliente').value,
+                servicio_id: document.getElementById('servicio_id').value,
+                barbero_id: document.getElementById('barbero_id').value,
+                fecha: document.getElementById('fecha').value,
+                hora_inicio: document.getElementById('hora_inicio').value
+            };
+
+            const password = document.getElementById('password-cliente').value;
+            if (password && password.length < 8) { mostrarAlerta('La contraseña debe tener al menos 8 caracteres.', false); return; }
+
+            try {
+                const res = await fetch('api/citas.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+                const resultado = await res.json();
+
+                alerta.classList.remove('hidden');
+                if (resultado.success) {
+                    alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-green-900 text-green-200 border border-green-700";
+                    alerta.innerHTML = `${resultado.message}<br><strong>Guarda tu folio: ${resultado.folio}</strong>`;
+                    document.getElementById('form-cita').reset();
+                } else {
+                    alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-red-900 text-red-200 border border-red-700";
+                    alerta.textContent = resultado.message;
+                }
+            } catch (error) {
+                console.error("Error al enviar cita:", error);
+                alerta.classList.remove('hidden');
+                alerta.className = "mb-4 p-4 rounded-lg text-sm text-center bg-red-900 text-red-200 border border-red-700";
+                alerta.textContent = "Ocurrió un error de conexión con el servidor.";
+            }
+        }
+
+        function mostrarAlerta(texto, ok) {
+            const a = document.getElementById('mensaje-alerta'); a.className = `mb-4 p-4 rounded-lg text-sm text-center ${ok ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'}`; a.textContent = texto;
+        }
+
+        async function iniciarSesionCliente(e) {
+            e.preventDefault(); const out = document.getElementById('mensaje-login-cliente');
+            try {
+                const r = await fetch('api/auth.php', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_login',email:document.getElementById('login-email-cliente').value,password:document.getElementById('login-password-cliente').value})});
+                const d = await r.json(); if (!d.success) throw new Error(d.message);
+                document.getElementById('nombre').value=d.cliente.nombre; document.getElementById('telefono').value=d.cliente.telefono; document.getElementById('email').value=d.cliente.email;
+                out.textContent='Sesión iniciada. Tus datos se usarán al reservar; guarda siempre el folio para consultar tu cita.';
+                cargarPerfilCliente();
+            } catch(err) { out.textContent=err.message; }
+        }
+
+        async function cargarPerfilCliente() {
+            const section=document.getElementById('perfil-cliente'); section.classList.remove('hidden');
+            const r=await fetch('api/clientes.php?perfil=1'); const d=await r.json();
+            if(!d.success){document.getElementById('datos-perfil').textContent=d.message;return;}
+            document.getElementById('datos-perfil').textContent=`${d.cliente.nombre} · ${d.cliente.telefono} · ${d.cliente.email||'Sin correo'}`;
+            const box=document.getElementById('citas-perfil');
+            if(!d.citas.length){box.innerHTML='<p class="text-gray-400">Aún no tienes citas en tu cuenta. Al reservar con el mismo teléfono aparecerán aquí.</p>';return;}
+            box.innerHTML=d.citas.map(c=>`<article class="rounded-xl border border-gray-700 bg-gray-900 p-4"><div class="flex flex-wrap justify-between gap-2"><div><p class="font-bold text-white">${c.servicio_name} · $${c.precio} MXN</p><p class="text-sm text-gray-300">${c.fecha} · ${c.hora_inicio.slice(0,5)}–${c.hora_fin.slice(0,5)} · ${c.estado}</p><p class="text-sm text-gray-400">Barbero: ${c.barbero_nombre||'Sin asignar'}</p></div><p class="text-amber-400 font-bold">Folio ${c.folio}</p></div>${!['cancelada','completada'].includes(c.estado)?`<form class="form-perfil-cita mt-3 grid grid-cols-2 gap-2" data-folio="${c.folio}"><input type="date" name="fecha" required min="${new Date().toLocaleDateString('en-CA')}" class="bg-gray-700 rounded p-2"><input type="time" name="hora_inicio" required class="bg-gray-700 rounded p-2"><button class="col-span-2 bg-amber-500 text-gray-900 rounded p-2 font-bold">Cambiar horario</button><button type="button" data-cancelar="${c.folio}" class="col-span-2 text-red-300 underline">Cancelar cita</button></form>`:''}</article>`).join('');
+        }
+
+        async function reprogramarDesdePerfil(e) {
+            if(!e.target.matches('.form-perfil-cita')) return; e.preventDefault(); const f=e.target;
+            const r=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_update',folio:f.dataset.folio,fecha:f.elements.fecha.value,hora_inicio:f.elements.hora_inicio.value})});
+            const d=await r.json(); alert(d.message); if(d.success)cargarPerfilCliente();
+        }
+
+        async function gestionarCitaPerfil(e) {
+            const folio=e.target.dataset.cancelar; if(!folio)return; if(!confirm('¿Cancelar esta cita?'))return;
+            const r=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_cancel',folio})}); const d=await r.json(); alert(d.message); if(d.success)cargarPerfilCliente();
+        }
+
+        async function cerrarSesionCliente() {
+            await fetch('api/auth.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_logout'})});
+            document.getElementById('perfil-cliente').classList.add('hidden'); document.getElementById('mensaje-login-cliente').textContent='Sesión cerrada.';
+        }
+
+        async function consultarCita(e) {
+            e.preventDefault(); const folio = document.getElementById('folio-consulta').value.trim(); const panel = document.getElementById('resultado-cita');
+            panel.textContent = 'Buscando…';
+            try {
+                const r = await fetch(`api/citas.php?folio=${encodeURIComponent(folio)}`); const d = await r.json();
+                if (!d.success) { panel.textContent = d.message; return; }
+                const c = d.cita; panel.innerHTML = `<p><b>Folio:</b> ${c.folio} · <b>Estado:</b> ${c.estado}</p><p>${c.servicio_name} · ${c.fecha} · ${c.hora_inicio.slice(0,5)}–${c.hora_fin.slice(0,5)}</p><p>Barbero: ${c.barbero_nombre||'Sin asignar'}</p>`;
+                if (!['cancelada','completada'].includes(c.estado)) panel.innerHTML += `<form id="form-reprogramar" class="mt-4 grid grid-cols-2 gap-2"><input type="date" id="nueva-fecha" required min="${new Date().toLocaleDateString('en-CA')}" class="bg-gray-700 p-2 rounded"><input type="time" id="nueva-hora" required class="bg-gray-700 p-2 rounded"><button class="col-span-2 bg-amber-500 text-gray-900 font-bold p-2 rounded">Cambiar horario</button></form><button id="cancelar-cita" class="mt-2 text-red-300 underline">Cancelar cita</button>`;
+                const form = document.getElementById('form-reprogramar'); if (form) form.addEventListener('submit', async ev => { ev.preventDefault(); const response=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_update',folio,fecha:document.getElementById('nueva-fecha').value,hora_inicio:document.getElementById('nueva-hora').value})}); const result=await response.json(); alert(result.message); if(result.success) document.getElementById('form-consulta').requestSubmit(); });
+                const cancel = document.getElementById('cancelar-cita'); if(cancel) cancel.addEventListener('click', async()=>{ if(!confirm('¿Cancelar esta cita?'))return; const response=await fetch('api/citas.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'customer_cancel',folio})}); const result=await response.json(); alert(result.message); if(result.success) document.getElementById('form-consulta').requestSubmit(); });
+            } catch { panel.textContent = 'No se pudo consultar la cita.'; }
+        }
+    </script>
+</body>
+</html>
